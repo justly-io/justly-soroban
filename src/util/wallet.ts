@@ -3,7 +3,7 @@ export interface Balance {
   balance: string;
 }
 
-export const fetchBalance = async (address: string): Promise<Balance[]> => {
+export const fetchBalance = async (_address: string): Promise<Balance[]> => {
   return [{ asset_type: "native", balance: "100" }];
 };
 

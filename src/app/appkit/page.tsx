@@ -2,7 +2,7 @@ import { ConnectButton } from "@/app/components/ConnectButton";
 import { InfoList } from "@/app/components/InfoList";
 import { ActionButtonList } from "@/app/components/ActionButtonList";
 import Image from "next/image";
-import XOConnectButton from "@/components/XOConnectButton";
+
 
 export default function Home() {
   return (

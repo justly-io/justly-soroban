@@ -36,7 +36,7 @@ export function useDevSetup() {
         setStatus("Step 1/4: Adding Category...");
         const tx = await slice.add_category({ name: "General" });
         await tx.signAndSend({ signTransaction: getSigner });
-      } catch (e) {
+      } catch (_e) {
         console.log("Category might already exist, continuing...");
       }
 

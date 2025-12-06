@@ -23,13 +23,13 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({ onSwipeComplete }) => 
 
   const handleMouseMove = React.useCallback((e: MouseEvent) => {
     if (!isDragging || !buttonRef.current) return;
-    
+
     const rect = buttonRef.current.getBoundingClientRect();
     const currentX = e.clientX - rect.left;
     const handleWidth = 36;
     const maxWidth = rect.width - handleWidth;
     const progress = Math.max(0, Math.min(100, (currentX / maxWidth) * 100));
-    
+
     currentXRef.current = currentX;
     setSwipeProgress(progress);
 
@@ -73,16 +73,16 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({ onSwipeComplete }) => 
     }
   };
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = React.useCallback((e: TouchEvent) => {
     if (!isDragging || !buttonRef.current) return;
     e.preventDefault();
-    
+
     const rect = buttonRef.current.getBoundingClientRect();
     const currentX = e.touches[0].clientX - rect.left;
     const handleWidth = 36;
     const maxWidth = rect.width - handleWidth;
     const progress = Math.max(0, Math.min(100, (currentX / maxWidth) * 100));
-    
+
     currentXRef.current = currentX;
     setSwipeProgress(progress);
 
@@ -91,16 +91,16 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({ onSwipeComplete }) => 
       setIsDragging(false);
       setSwipeProgress(0);
     }
-  };
+  }, [isDragging, onSwipeComplete]);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = React.useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
       if (swipeProgress < 80) {
         setSwipeProgress(0);
       }
     }
-  };
+  }, [isDragging, swipeProgress]);
 
   useEffect(() => {
     if (isDragging) {
@@ -111,7 +111,7 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({ onSwipeComplete }) => 
         window.removeEventListener("touchend", handleTouchEnd);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, handleTouchMove, handleTouchEnd]);
 
   return (
     <button
@@ -122,24 +122,23 @@ export const SwipeButton: React.FC<SwipeButtonProps> = ({ onSwipeComplete }) => 
     >
       <div className={styles.buttonBackground} />
       <div className={styles.buttonBorder} />
-      
+
       {/* Progress bar that covers the text */}
-      <div 
+      <div
         className={styles.progressBar}
         style={{ width: `calc(${swipeProgress}% + 18px)` }}
       />
-      
+
       <div className={styles.swipeHandle} style={{ left: `${swipeProgress}%` }}>
         <div className={styles.handleGradient} />
-        <img 
-          src="/images/category-amount/subtract-icon.svg" 
-          alt="Arrow" 
+        <img
+          src="/images/category-amount/subtract-icon.svg"
+          alt="Arrow"
           className={styles.arrowIcon}
         />
       </div>
-      
+
       <span className={styles.buttonText}>Desliza para buscar disputas</span>
     </button>
   );
 };
-

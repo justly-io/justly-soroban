@@ -1,4 +1,4 @@
-/* eslint-disable react-x/no-use-context, react-x/no-context-provider */
+
 import React, { createContext, useContext, useCallback, useState } from "react";
 import { useWallet } from "../hooks/useWallet";
 import {
@@ -16,7 +16,7 @@ const PrizePoolContext = createContext<PrizePoolContextType | undefined>(
   undefined,
 );
 
-// eslint-disable-next-line react-refresh/only-export-components
+
 export const usePrizePool = () => {
   const context = useContext(PrizePoolContext);
   if (!context) {

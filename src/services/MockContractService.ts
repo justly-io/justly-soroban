@@ -5,8 +5,8 @@ export const mockContractClient = {
   options: {
     publicKey: undefined as string | undefined,
   },
-  add_funds: async (args: any) => ({
-    signAndSend: async (opts: any) => ({ result: { unwrap: () => "mock-tx-hash-123" } }),
+  add_funds: async (_args: any) => ({
+    signAndSend: async (_opts: any) => ({ result: { unwrap: () => "mock-tx-hash-123" } }),
   }),
   prize_pot: async () => ({
     result: BigInt(10000000), // Mock 1 XLM (10^7 stroops)
@@ -17,7 +17,7 @@ export const MockContractService = {
   slice,
   contractClient: mockContractClient,
 
-  extractTransactionData: (result: any) => ({
+  extractTransactionData: (_result: any) => ({
     success: true,
     txHash: "mock-tx-hash-123",
   }),

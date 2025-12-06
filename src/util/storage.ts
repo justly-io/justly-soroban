@@ -78,4 +78,5 @@ class TypedStorage<T> {
 /**
  * Fully-typed wrapper around localStorage
  */
-export default new TypedStorage<Schema>();
+const storageInstance = new TypedStorage<Schema>();
+export default storageInstance;

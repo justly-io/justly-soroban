@@ -4,7 +4,7 @@ export const useSliceVoting = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [logs, setLogs] = useState<string>("");
 
-  const commitVote = async (disputeId: string, vote: number) => {
+  const commitVote = async (_disputeId: string, _vote: number) => {
     setIsProcessing(true);
     setLogs("Simulating EVM Commit...");
     await new Promise((r) => setTimeout(r, 1000));
@@ -12,7 +12,7 @@ export const useSliceVoting = () => {
     return true;
   };
 
-  const revealVote = async (disputeId: string) => {
+  const revealVote = async (_disputeId: string) => {
     setIsProcessing(true);
     setLogs("Simulating EVM Reveal...");
     await new Promise((r) => setTimeout(r, 1000));

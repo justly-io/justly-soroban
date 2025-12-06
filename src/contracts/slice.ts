@@ -1,5 +1,5 @@
 const mockTx = {
-  signAndSend: async ({ signTransaction }: { signTransaction: any }) => {
+  signAndSend: async ({ signTransaction: _signTransaction }: { signTransaction: any }) => {
     return {
       result: {
         unwrap: () => BigInt(123) // Mock dispute ID or result
@@ -12,15 +12,15 @@ const slice = {
   options: {
     publicKey: undefined as string | undefined,
   },
-  add_category: async (args: any) => mockTx,
-  create_dispute: async (args: any) => mockTx,
-  pay_dispute: async (args: any) => mockTx,
-  execute: async (args: any) => mockTx,
-  vote: async (args: any) => mockTx,
-  reveal: async (args: any) => mockTx,
-  join_court: async (args: any) => mockTx,
-  claim: async (args: any) => mockTx,
-  get_dispute: async (args: any) => ({
+  add_category: async (_args: any) => mockTx,
+  create_dispute: async (_args: any) => mockTx,
+  pay_dispute: async (_args: any) => mockTx,
+  execute: async (_args: any) => mockTx,
+  vote: async (_args: any) => mockTx,
+  reveal: async (_args: any) => mockTx,
+  join_court: async (_args: any) => mockTx,
+  claim: async (_args: any) => mockTx,
+  get_dispute: async (_args: any) => ({
     result: {
       unwrap: () => ({
         id: BigInt(123),

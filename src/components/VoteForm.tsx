@@ -176,7 +176,7 @@ export const VoteForm: React.FC<VoteFormProps> = ({
             Selected: {vote === 0 ? 'Against' : 'For'}
           </p>
           <p className="text-xs" style={{ margin: 0, color: '#6b7280' }}>
-            Your vote will be hidden using zero-knowledge proofs. You'll need to reveal it after the voting period ends.
+            Your vote will be hidden using zero-knowledge proofs. You&apos;ll need to reveal it after the voting period ends.
           </p>
         </Box>
       )}

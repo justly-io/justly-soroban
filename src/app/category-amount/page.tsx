@@ -56,7 +56,7 @@ export default function CategoryAmountPage() {
         <h1 className="text-2xl font-bold mb-2">Select amount of money</h1>
 
         <p className="text-gray-500 text-sm mb-6">
-          You'll play with users with a monetary range selection like yours
+          You&apos;ll play with users with a monetary range selection like yours
         </p>
 
         <AmountSelector

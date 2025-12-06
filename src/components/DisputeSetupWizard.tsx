@@ -36,7 +36,7 @@ export const DisputeSetupWizard: React.FC = () => {
       try {
         const catTx = await slice.add_category({ name: "General" });
         await catTx.signAndSend({ signTransaction: getSigner });
-      } catch (e) {
+      } catch (_e) {
         /* Ignore */
       }
 
