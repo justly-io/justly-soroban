@@ -1,6 +1,6 @@
 export const sliceAddress = process.env.NEXT_PUBLIC_SLICE_ADDRESS
   ? process.env.NEXT_PUBLIC_SLICE_ADDRESS
-  : "0xcD6a42782d230D7c13A74ddec5dD140e55499Df9";
+  : "0x1dcf30749042f7364e343525603B3BbFa8C71e45";
 
 export const sliceAbi = [
   {

@@ -1,6 +1,6 @@
 // 1. Define Types
 type ChainDetail = {
-  chainId: string; // Hex string for wallets (e.g., '0x89')
+  chainId: string;
   chainName: string;
   nativeCurrency: {
     name: string;
@@ -12,73 +12,72 @@ type ChainDetail = {
   iconUrls: readonly string[];
 };
 
-type PolygonConfig = {
-  chainId: number; // Decimal ID for internal logic
+type CeloConfig = {
+  chainId: number;
   rpcUrls: { [key: number]: string };
-  supportedChains: readonly [ChainDetail]; // Tuple of 1
+  supportedChains: readonly [ChainDetail];
 };
 
 export type SettingsType = {
   apiDomain: string;
   environment: "development" | "staging" | "production";
-  polygon: PolygonConfig;
+  celo: CeloConfig;
 };
 
-// 2. Define Chain Configurations (DRY - Define once, use everywhere)
-
-// Polygon Amoy (Testnet)
-const POLYGON_AMOY: PolygonConfig = {
-  chainId: 80002,
-  rpcUrls: { 80002: "https://rpc-amoy.polygon.technology" },
+// 2. Define Celo Sepolia (New Testnet)
+// Chain ID: 11142220
+const CELO_SEPOLIA: CeloConfig = {
+  chainId: 11142220,
+  // RPC URL from Celo Docs / Hardhat config
+  rpcUrls: { 11142220: "https://forno.celo-sepolia.celo-testnet.org" },
   supportedChains: [
     {
-      chainId: "0x13882",
-      chainName: "Polygon Amoy",
-      nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
-      rpcUrls: ["https://rpc-amoy.polygon.technology"],
-      blockExplorerUrls: ["https://amoy.polygonscan.com"],
-      iconUrls: ["https://cryptologos.cc/logos/polygon-matic-logo.png?v=032"],
+      chainId: "0xaa044c", // Hex for 11142220
+      chainName: "Celo Sepolia",
+      nativeCurrency: { name: "Celo", symbol: "CELO", decimals: 18 },
+      rpcUrls: ["https://forno.celo-sepolia.celo-testnet.org"],
+      blockExplorerUrls: ["https://celo-sepolia.blockscout.com"], // Celo's Blockscout
+      iconUrls: ["https://cryptologos.cc/logos/celo-celo-logo.png"],
     },
   ],
 } as const;
 
-// Polygon Mainnet
-const POLYGON_MAINNET: PolygonConfig = {
-  chainId: 137,
-  rpcUrls: { 137: "https://polygon-rpc.com" },
+// 3. Define Celo Mainnet (No change needed here, retained for completeness)
+const CELO_MAINNET: CeloConfig = {
+  chainId: 42220,
+  rpcUrls: { 42220: "https://forno.celo.org" },
   supportedChains: [
     {
-      chainId: "0x89",
-      chainName: "Polygon Mainnet",
-      nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
-      rpcUrls: ["https://polygon-rpc.com"],
-      blockExplorerUrls: ["https://polygonscan.com"],
-      iconUrls: ["https://cryptologos.cc/logos/polygon-matic-logo.png?v=032"],
+      chainId: "0xa4ec", // Hex for 42220
+      chainName: "Celo",
+      nativeCurrency: { name: "Celo", symbol: "CELO", decimals: 18 },
+      rpcUrls: ["https://forno.celo.org"],
+      blockExplorerUrls: ["https://celoscan.io"],
+      iconUrls: ["https://cryptologos.cc/logos/celo-celo-logo.png"],
     },
   ],
 } as const;
 
-// 3. Define Environments
+// 4. Update Environments to use CELO_SEPOLIA
 const development: SettingsType = {
   apiDomain: "http://localhost:5001",
   environment: "development",
-  polygon: POLYGON_AMOY,
+  celo: CELO_SEPOLIA, // Using the new testnet
 };
 
 const staging: SettingsType = {
   apiDomain: "https://staging-api.slicehub.com",
   environment: "staging",
-  polygon: POLYGON_AMOY,
+  celo: CELO_SEPOLIA, // Using the new testnet
 };
 
 const production: SettingsType = {
   apiDomain: "https://api.slicehub.com",
   environment: "production",
-  polygon: POLYGON_MAINNET,
+  celo: CELO_MAINNET,
 };
 
-// 4. Export Config based on Environment Variable
-// We default to 'development' if the variable is missing to prevent crashes
+// 5. Export Config based on Environment Variable
 const env = (process.env.NEXT_PUBLIC_APP_ENV ||
   process.env.NODE_ENV ||
   "development") as keyof typeof configs;
@@ -89,5 +88,4 @@ const configs = {
   production,
 };
 
-// Export the specific settings for the current environment
 export const settings: SettingsType = configs[env] || configs.development;

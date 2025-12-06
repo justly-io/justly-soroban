@@ -41,7 +41,8 @@ export function useAssignDispute() {
 
       // In Ethers v6, overrides like { value } are passed as the last argument
       const tx = await contract.joinDispute(latestDisputeId, {
-        value: parseEther(ethAmount),
+        // TODO! Add dynamic pricing for both smart contract and app
+        value: parseEther("0.00005"),
       });
 
       toast.info("Staking transaction sent...");
