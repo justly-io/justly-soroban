@@ -103,7 +103,7 @@ export const DisputesList: React.FC = () => {
           <div className={styles.icon}>
             <BarChartIcon />
           </div>
-          <h2 className={styles.title}>Mis disputas:</h2>
+          <h2 className={styles.title}>My disputes:</h2>
         </div>
         <button
           onClick={() => router.push("/create")}
@@ -126,7 +126,7 @@ export const DisputesList: React.FC = () => {
       </div>
 
       <button className={styles.justiceButton} onClick={handleJusticeClick}>
-        Hacer justicia
+        Make Justice
       </button>
     </div>
   );
