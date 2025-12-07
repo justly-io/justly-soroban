@@ -53,7 +53,7 @@ export function useGetDispute(disputeId: string | number) {
     } finally {
       setIsLoading(false);
     }
-  }, [disputeId]);
+  }, [disputeId, contract]);
 
   // Auto-fetch on mount or ID change
   useEffect(() => {
