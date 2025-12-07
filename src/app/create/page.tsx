@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useCreateDispute } from "@/hooks/useCreateDispute";
 import { Loader2, UploadCloud, ShieldAlert, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export default function CreateDisputePage() {
-  const router = useRouter();
   const { createDispute, isCreating } = useCreateDispute();
 
   // Form State

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect, useState } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { DisputeOverviewHeader } from "@/components/dispute-overview/DisputeOverviewHeader";
 import { DisputeInfoCard } from "@/components/dispute-overview/DisputeInfoCard";
@@ -56,6 +56,10 @@ export default function ExecuteRulingPage() {
     isDragging.current = true;
   }, []);
 
+  const handleBackCallback = useCallback(() => {
+    router.push(`/disputes/${disputeId}`);
+  }, [router, disputeId]);
+
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
     if (!isDragging.current || !startX.current) return;
     const endX = e.changedTouches[0].clientX;
@@ -63,11 +67,11 @@ export default function ExecuteRulingPage() {
 
     // Swipe Right -> Back
     if (deltaX < -50) {
-      handleBack();
+      handleBackCallback();
     }
     isDragging.current = false;
     startX.current = null;
-  }, []);
+  }, [handleBackCallback]);
 
   // --- Display Data ---
   const displayDispute = dispute
