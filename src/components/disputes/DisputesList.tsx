@@ -6,8 +6,8 @@ import { DisputeCard } from "./DisputeCard";
 import { BarChartIcon } from "./icons/Icon";
 import { FilterIcon } from "./icons/BadgeIcons";
 import styles from "./DisputesList.module.css";
-import { Gavel, Eye } from "lucide-react"; // Import new icons
-import { useSliceContract } from "@/hooks/useSliceContract"; // Import contract hook
+import { Gavel, Eye } from "lucide-react";
+import { useSliceContract } from "@/hooks/useSliceContract";
 
 export interface Dispute {
   id: string;
@@ -95,7 +95,9 @@ const mockDisputes: Dispute[] = [
 export const DisputesList: React.FC = () => {
   const router = useRouter();
   const contract = useSliceContract();
-  const [latestId, setLatestId] = useState<string>("1");
+
+  // Initialize as null so buttons are disabled by default until data loads
+  const [latestId, setLatestId] = useState<string | null>(null);
 
   // Fetch the latest dispute ID from the contract
   useEffect(() => {
@@ -103,12 +105,15 @@ export const DisputesList: React.FC = () => {
       if (contract) {
         try {
           const count = await contract.disputeCount();
-          // Assuming IDs are 1-based or 0-based, count represents the latest created
+          // Only enable buttons if we actually have disputes (> 0)
           if (Number(count) > 0) {
             setLatestId(count.toString());
+          } else {
+            setLatestId(null);
           }
         } catch (error) {
           console.error("Failed to fetch dispute count", error);
+          setLatestId(null);
         }
       }
     };
@@ -133,20 +138,42 @@ export const DisputesList: React.FC = () => {
         <div className="flex items-center gap-2">
           {/* Vote Button */}
           <button
-            onClick={() => router.push(`/vote/${latestId}`)}
-            className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center hover:bg-blue-100 transition-colors"
-            title={`Vote on Dispute #${latestId}`}
+            onClick={() => latestId && router.push(`/vote/${latestId}`)}
+            disabled={!latestId}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+              latestId
+                ? "bg-blue-50 border-blue-100 hover:bg-blue-100 cursor-pointer"
+                : "bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed"
+            }`}
+            title={
+              latestId
+                ? `Vote on Dispute #${latestId}`
+                : "No disputes available"
+            }
           >
-            <Gavel className="w-4 h-4 text-blue-600" />
+            <Gavel
+              className={`w-4 h-4 ${latestId ? "text-blue-600" : "text-gray-400"}`}
+            />
           </button>
 
           {/* Reveal Button */}
           <button
-            onClick={() => router.push(`/reveal/${latestId}`)}
-            className="w-8 h-8 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center hover:bg-purple-100 transition-colors"
-            title={`Reveal Vote for Dispute #${latestId}`}
+            onClick={() => latestId && router.push(`/reveal/${latestId}`)}
+            disabled={!latestId}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+              latestId
+                ? "bg-purple-50 border-purple-100 hover:bg-purple-100 cursor-pointer"
+                : "bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed"
+            }`}
+            title={
+              latestId
+                ? `Reveal Vote for Dispute #${latestId}`
+                : "No disputes available"
+            }
           >
-            <Eye className="w-4 h-4 text-purple-600" />
+            <Eye
+              className={`w-4 h-4 ${latestId ? "text-purple-600" : "text-gray-400"}`}
+            />
           </button>
 
           <button className={styles.filterButton}>
