@@ -41,31 +41,32 @@ export const DisputesList: React.FC = () => {
         // 1. Get IDs where I am involved (Juror)
         const jurorIds = await contract.getJurorDisputes(address);
 
-        const loaded = await Promise.all(jurorIds.map(async (idBg: bigint) => {
+        const loaded = await Promise.all(
+          jurorIds.map(async (idBg: bigint) => {
             const id = idBg.toString();
             const d = await contract.disputes(id);
 
             // Fetch IPFS for Title/Icon
             let title = `Dispute #${id}`;
-            let icon = undefined;
-            if(d.ipfsHash) {
-                const meta = await fetchJSONFromIPFS(d.ipfsHash);
-                if(meta) {
-                    title = meta.title || title;
-                }
+            if (d.ipfsHash) {
+              const meta = await fetchJSONFromIPFS(d.ipfsHash);
+              if (meta) {
+                title = meta.title || title;
+              }
             }
 
             // Calculate basic stats (mocked for list view as needed)
             return {
-                id,
-                title,
-                category: d.category,
-                votesCount: 0,
-                totalVotes: Number(d.jurorsRequired),
-                prize: "Rewards Pending", // Could calc from d.jurorStake
-                voters: []
+              id,
+              title,
+              category: d.category,
+              votesCount: 0,
+              totalVotes: Number(d.jurorsRequired),
+              prize: "Rewards Pending", // Could calc from d.jurorStake
+              voters: [],
             };
-        }));
+          }),
+        );
 
         // Sort by ID descending
         const sorted = loaded.reverse();
@@ -73,7 +74,7 @@ export const DisputesList: React.FC = () => {
 
         // Set active dispute to the most recent one if any
         if (sorted.length > 0) {
-            setActiveDisputeId(sorted[0].id);
+          setActiveDisputeId(sorted[0].id);
         }
       } catch (e) {
         console.error("Error loading disputes", e);
@@ -156,13 +157,13 @@ export const DisputesList: React.FC = () => {
       {/* Disputes List */}
       <div className="flex flex-col gap-[25px] mb-10">
         {myDisputes.length === 0 ? (
-           <div className="text-gray-400 text-sm text-center py-10 bg-gray-50 rounded-2xl border border-gray-100">
-             No disputes found. Join one to get started!
-           </div>
+          <div className="text-gray-400 text-sm text-center py-10 bg-gray-50 rounded-2xl border border-gray-100">
+            No disputes found. Join one to get started!
+          </div>
         ) : (
-             myDisputes.map((dispute) => (
-              <DisputeCard key={dispute.id} dispute={dispute} />
-            ))
+          myDisputes.map((dispute) => (
+            <DisputeCard key={dispute.id} dispute={dispute} />
+          ))
         )}
       </div>
 

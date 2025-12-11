@@ -56,23 +56,27 @@ export default function MyVotesPage() {
             // B. Fetch Off-Chain Metadata (IPFS) for Title
             let title = `Dispute #${id}`;
             if (d.ipfsHash) {
-               const meta = await fetchJSONFromIPFS(d.ipfsHash);
-               if (meta?.title) title = meta.title;
+              const meta = await fetchJSONFromIPFS(d.ipfsHash);
+              if (meta?.title) title = meta.title;
             }
 
             // C. Determine User Status
             const hasRevealed = await contract.hasRevealed(id, address);
             // Check local storage only for the "Secret" needed to reveal
-            const localSecret = localStorage.getItem(`slice_vote_${id}_${address}`);
+            const localSecret = localStorage.getItem(
+              `slice_vote_${id}_${address}`,
+            );
 
             // D. Calculate Phase
             let phase: Task["phase"] = "WAITING";
             let deadline = 0;
 
-            if (status === 1) { // Commit Phase
+            if (status === 1) {
+              // Commit Phase
               deadline = Number(d.commitDeadline);
               phase = localSecret ? "WAITING" : "VOTE"; // If secret exists, they voted
-            } else if (status === 2) { // Reveal Phase
+            } else if (status === 2) {
+              // Reveal Phase
               deadline = Number(d.revealDeadline);
               phase = hasRevealed ? "DONE" : "REVEAL";
             } else if (status === 3) {
@@ -82,16 +86,34 @@ export default function MyVotesPage() {
             // E. Formatting
             const now = Math.floor(Date.now() / 1000);
             const diff = deadline - now;
-            const deadlineLabel = diff > 0
-              ? `${Math.ceil(diff / 3600)}h remaining`
-              : "Ended";
+            const deadlineLabel =
+              diff > 0 ? `${Math.ceil(diff / 3600)}h remaining` : "Ended";
 
             // Styling Helpers
             const getStyles = (p: string) => {
-               if(p === "VOTE") return { color: "text-blue-600", bg: "bg-blue-50", icon: <Gavel className="w-5 h-5"/> };
-               if(p === "REVEAL") return { color: "text-purple-600", bg: "bg-purple-50", icon: <Eye className="w-5 h-5"/> };
-               if(p === "DONE") return { color: "text-green-600", bg: "bg-green-50", icon: <CheckCircle2 className="w-5 h-5"/> };
-               return { color: "text-gray-500", bg: "bg-gray-100", icon: <Clock className="w-5 h-5"/> };
+              if (p === "VOTE")
+                return {
+                  color: "text-blue-600",
+                  bg: "bg-blue-50",
+                  icon: <Gavel className="w-5 h-5" />,
+                };
+              if (p === "REVEAL")
+                return {
+                  color: "text-purple-600",
+                  bg: "bg-purple-50",
+                  icon: <Eye className="w-5 h-5" />,
+                };
+              if (p === "DONE")
+                return {
+                  color: "text-green-600",
+                  bg: "bg-green-50",
+                  icon: <CheckCircle2 className="w-5 h-5" />,
+                };
+              return {
+                color: "text-gray-500",
+                bg: "bg-gray-100",
+                icon: <Clock className="w-5 h-5" />,
+              };
             };
 
             const style = getStyles(phase);
@@ -104,14 +126,17 @@ export default function MyVotesPage() {
               deadlineLabel,
               statusColor: style.color,
               bgColor: style.bg,
-              icon: style.icon
+              icon: style.icon,
             };
-          })
+          }),
         );
 
         // Sort: Actionable items first
-        setTasks(loadedTasks.sort((a, b) => (a.phase === "VOTE" || a.phase === "REVEAL" ? -1 : 1)));
-
+        setTasks(
+          loadedTasks.sort((a) =>
+            a.phase === "VOTE" || a.phase === "REVEAL" ? -1 : 1,
+          ),
+        );
       } catch (e) {
         console.error("Error fetching juror tasks:", e);
       } finally {
