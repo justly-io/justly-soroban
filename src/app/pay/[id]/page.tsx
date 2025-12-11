@@ -121,7 +121,7 @@ export default function PayDisputePage() {
           </div>
         ) : (
           <SwipeButton onSwipeComplete={() => void handleSwipeComplete()}>
-            Swipe to Fund {stakeAmountDisplay} USDC
+            Fund {stakeAmountDisplay} USDC
           </SwipeButton>
         )}
       </div>

@@ -92,7 +92,7 @@ const XOConnectButton = () => {
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#8c8fff]"></span>
             </div>
 
-            <span className="font-manrope text-sm font-extrabold tracking-tight">
+            <span className="font-manrope font-bold tracking-tight">
               {shortAddress}
             </span>
           </Button>
@@ -105,7 +105,7 @@ const XOConnectButton = () => {
             <div className="rounded-2xl border border-gray-100 bg-white p-4 text-popover-foreground shadow-xl">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-manrope text-sm font-bold text-[#1b1c23]">
+                  <h4 className="font-manrope font-bold text-[#1b1c23]">
                     Wallet Connected
                   </h4>
                   <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase text-[#8c8fff]">

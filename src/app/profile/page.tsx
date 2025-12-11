@@ -31,17 +31,24 @@ export default function ProfilePage() {
       try {
         const ids = await contract.getUserDisputes(address);
 
-        const casesData = await Promise.all(ids.map(async (idBg: bigint) => {
-          const id = idBg.toString();
-          const d = await contract.disputes(id);
-          // Optional: Fetch IPFS title
-          return {
-            id,
-            role: d.claimer.toLowerCase() === address.toLowerCase() ? "Claimer" : "Defender",
-            status: ["Created", "Commit", "Reveal", "Finished"][Number(d.status)],
-            category: d.category
-          };
-        }));
+        const casesData = await Promise.all(
+          ids.map(async (idBg: bigint) => {
+            const id = idBg.toString();
+            const d = await contract.disputes(id);
+            // Optional: Fetch IPFS title
+            return {
+              id,
+              role:
+                d.claimer.toLowerCase() === address.toLowerCase()
+                  ? "Claimer"
+                  : "Defender",
+              status: ["Created", "Commit", "Reveal", "Finished"][
+                Number(d.status)
+              ],
+              category: d.category,
+            };
+          }),
+        );
         setMyCases(casesData.reverse()); // Show newest first
       } catch (e) {
         console.error(e);
@@ -130,18 +137,18 @@ export default function ProfilePage() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-3 w-full mt-2">
             <div className="bg-[#f5f6f9] p-4 rounded-2xl flex flex-col gap-1">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <span className="text font-bold text-gray-400 uppercase tracking-wider">
                 Rank
               </span>
-              <span className="text-lg font-semibold text-[#1b1c23]">
+              <span className="text-md font-semibold text-[#1b1c23]">
                 Justice Lvl 5
               </span>
             </div>
             <div className="bg-[#f5f6f9] p-4 rounded-2xl flex flex-col gap-1">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <span className="text font-bold text-gray-400 uppercase tracking-wider">
                 Earnings
               </span>
-              <span className="text-lg font-semibold text-[#1b1c23]">
+              <span className="text-md font-semibold text-[#1b1c23]">
                 $1,240
               </span>
             </div>
@@ -150,7 +157,7 @@ export default function ProfilePage() {
 
         {/* NEW SECTION: My Cases */}
         <div className="flex flex-col gap-3 mt-4">
-          <h3 className="font-manrope font-bold text-sm text-gray-400 uppercase tracking-wider ml-1">
+          <h3 className="font-manrope font-bold text-gray-800 uppercase tracking-wider ml-1">
             My Cases
           </h3>
 
@@ -160,14 +167,21 @@ export default function ProfilePage() {
             </div>
           ) : (
             myCases.map((c) => (
-              <div key={c.id} className="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
-                 <div>
-                   <div className="font-bold text-[#1b1c23]">Dispute #{c.id}</div>
-                   <div className="text-xs text-gray-500">{c.role} • {c.category}</div>
-                 </div>
-                 <span className="px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600">
-                   {c.status}
-                 </span>
+              <div
+                key={c.id}
+                className="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center"
+              >
+                <div>
+                  <div className="font-bold text-[#1b1c23]">
+                    Dispute #{c.id}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {c.role} • {c.category}
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600">
+                  {c.status}
+                </span>
               </div>
             ))
           )}
@@ -175,7 +189,7 @@ export default function ProfilePage() {
 
         {/* --- Main Actions --- */}
         <div className="flex flex-col gap-3">
-          <h3 className="font-manrope font-bold text-sm text-gray-400 uppercase tracking-wider ml-1">
+          <h3 className="font-manrope font-bold text-gray-800 uppercase tracking-wider ml-1">
             Actions
           </h3>
 
@@ -201,11 +215,8 @@ export default function ProfilePage() {
         {/* --- Testing Tools Zone --- */}
         <div className="flex flex-col gap-3 pb-8">
           <div className="flex justify-between items-center ml-1">
-            <h3 className="font-manrope font-bold text-sm text-[#8c8fff] uppercase tracking-wider flex items-center gap-2">
-              Dev Tools{" "}
-              <span className="bg-[#8c8fff]/10 text-[#8c8fff] text-[10px] px-2 py-0.5 rounded-full">
-                TESTNET
-              </span>
+            <h3 className="font-manrope font-bold text-[#8c8fff] uppercase tracking-wider flex items-center gap-2">
+              Dev Tools
             </h3>
 
             {/* 2. Updated Header Actions (Debug + Refresh) */}
@@ -275,10 +286,8 @@ export default function ProfilePage() {
                 disabled={!targetDisputeId}
                 className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-[#8c8fff] hover:bg-[#8c8fff]/5 transition-all disabled:opacity-50"
               >
-                <Gavel className="w-5 h-5 text-[#1b1c23]" />
-                <span className="text-xs font-bold text-[#1b1c23]">
-                  Execute Ruling
-                </span>
+                <Gavel className="w-5 h-5" />
+                <span className="text-xs font-bold">Execute Ruling</span>
               </button>
             </div>
           </div>

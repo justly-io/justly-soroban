@@ -85,7 +85,7 @@ export default function CreateDisputePage() {
       <div className="flex-1 bg-white rounded-[18px] p-6 shadow-sm border border-gray-100 flex flex-col gap-6 overflow-y-auto">
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-[#1b1c23]">
+            <label className="font-semibold text-[#1b1c23]">
               Dispute Title
             </label>
             <input
@@ -99,7 +99,7 @@ export default function CreateDisputePage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-[#1b1c23]">Category</label>
+            <label className="font-semibold text-[#1b1c23]">Category</label>
             <select
               className="p-3 bg-[#f5f6f9] rounded-xl text-sm border-none focus:ring-2 focus:ring-[#8c8fff] outline-none"
               value={category}
@@ -114,7 +114,7 @@ export default function CreateDisputePage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-[#1b1c23]">
+            <label className="font-semibold text-[#1b1c23]">
               Defendant Address
             </label>
             <input
@@ -128,9 +128,9 @@ export default function CreateDisputePage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-[#1b1c23] flex justify-between">
+            <label className="font-semibold text-[#1b1c23] flex justify-between">
               <span>Jurors Needed</span>
-              <span className="text-[#8c8fff] font-normal">
+              <span className="text-[#8c8fff] font-normal text-xs">
                 {jurorsRequired} Jurors
               </span>
             </label>
@@ -153,9 +153,7 @@ export default function CreateDisputePage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-[#1b1c23]">
-              Description
-            </label>
+            <label className="font-semibold text-[#1b1c23]">Description</label>
             <textarea
               className="p-3 bg-[#f5f6f9] rounded-xl text-sm border-none focus:ring-2 focus:ring-[#8c8fff] outline-none min-h-[120px] resize-none"
               placeholder="Describe the issue in detail..."
@@ -166,7 +164,7 @@ export default function CreateDisputePage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-[#1b1c23]">
+            <label className="font-semibold text-[#1b1c23]">
               Evidence Link (Optional)
             </label>
             <div className="flex items-center gap-2 bg-[#f5f6f9] rounded-xl p-3">
