@@ -10,7 +10,10 @@ interface IconProps {
  * Optimizado para escalado sin pérdida de calidad
  * Tamaño visual: ajustar size para coincidir con el diseño
  */
-export const DepositIcon: React.FC<IconProps> = ({ className, size = 40.515 }) => {
+export const DepositIcon: React.FC<IconProps> = ({
+  className,
+  size = 40.515,
+}) => {
   return (
     <svg
       width={size}
@@ -22,12 +25,24 @@ export const DepositIcon: React.FC<IconProps> = ({ className, size = 40.515 }) =
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <linearGradient id="depositGradient" x1="20.2572" y1="0" x2="20.2572" y2="40.5146" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="depositGradient"
+          x1="20.2572"
+          y1="0"
+          x2="20.2572"
+          y2="40.5146"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#8C8FFF" />
           <stop offset="1" stopColor="#7EB5FD" />
         </linearGradient>
       </defs>
-      <circle cx="20.2572" cy="20.2573" r="20.2573" fill="url(#depositGradient)" />
+      <circle
+        cx="20.2572"
+        cy="20.2573"
+        r="20.2573"
+        fill="url(#depositGradient)"
+      />
       <path
         d="M20 29L25 24M20 29L15 24M20 29V11"
         stroke="#1B1C23"
@@ -67,3 +82,49 @@ export const SendIcon: React.FC<IconProps> = ({ className, size = 40.515 }) => {
   );
 };
 
+/**
+ * Receive Icon - White circle with QR code symbol
+ */
+export const ReceiveIcon: React.FC<IconProps> = ({
+  className,
+  size = 40.515,
+}) => {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 41 41"
+      fill="none"
+      className={className}
+      style={{ display: "block" }}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      {/* Reusing the style of the Send button (White Circle) */}
+      <circle cx="20.2573" cy="20.2573" r="20.2573" fill="#EFF1F5" />
+      {/* QR Code-like paths */}
+      <path
+        d="M13 13H19V19H13V13Z"
+        stroke="#1B1C23"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M22 13H28V19H22V13Z"
+        stroke="#1B1C23"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13 22H19V28H13V22Z"
+        stroke="#1B1C23"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M22 22H25V25H22V22Z" fill="#1B1C23" />
+      <path d="M25 25H28V28H25V25Z" fill="#1B1C23" />
+    </svg>
+  );
+};
