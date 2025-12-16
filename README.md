@@ -35,7 +35,6 @@ When **human judgment** is needed in decentralized applications—such as resolv
 * **Random Juror Selection**: Ensures fairness and unpredictability.
 * **Private Commit–Reveal Voting**: Prevents bribery or manipulation.
 * **Economic Security**: Jurors stake tokens, earning rewards for honesty and risking penalties for dishonesty.
-
 ---
 
 ## Deployed Contracts
@@ -52,28 +51,24 @@ The protocol is currently deployed on the following networks.
 
 ## Environment & Connectivity
 
-This application is configured to handle two primary environments and two distinct wallet connection methods based on the `NEXT_PUBLIC_APP_ENV` variable.
+### 1\. 🛡️ Neutral & Trustless Rulings
 
-### Environment Mapping
+Slice uses **Verifiable Random Functions (VRF)** to select jurors from a staked pool, ensuring no single party can influence the jury composition. The result is a simple, binary ruling (`Party A` or `Party B`) that is mathematically verifiable.
 
-The connection chain is determined by the explicit `APP_ENV` setting. If no environment variable is explicitly set, the connection mode defaults to **Web Mode**.
+### 2\. 🗳️ Private Commit–Reveal Voting
 
-| Environment Variable (`NEXT_PUBLIC_APP_ENV`) | Environment | Chain Used | Connection Mode |
-| :--- | :--- | :--- | :--- |
-| `production` | Production | **Polygon Mainnet** | **Embedded (XO Connect)** |
-| `staging` | Staging | Polygon Amoy (Testnet) | Web (Reown AppKit) |
-| `development` (Default) | Development | Polygon Amoy (Testnet) | Web (Reown AppKit) |
+To prevent bribery, collusion, and "copycat" voting, Slice implements a robust two-stage voting process:
 
-### Wallet Connection Modes
+  * **Commit Phase:** Jurors submit a hash of their vote + a secret salt (`keccak256(vote + salt)`). The vote remains hidden on-chain.
+  * **Reveal Phase:** Jurors reveal their vote and salt. Slice verifies the hash matches the commitment. Only revealed votes are tallied.
 
-| Mode | Triggered By | Wallet Used | Role |
-| :--- | :--- | :--- | :--- |
-| **Embedded Mode** | `NEXT_PUBLIC_APP_ENV=production` | **XO Connect** | Used when running as a mini-app inside a super-app/wallet container. |
-| **Web Mode** | `NEXT_PUBLIC_APP_ENV` ≠ `production` | **Reown AppKit / Wagmi** | Used when running as a standard decentralized application (dApp) in a web browser. |
+### 3\. 🪙 Configurable Staking & Incentives
 
----
+Slice is token-agnostic. Each deployment can configure its own **staking token** (e.g., USDC, stablecoins, or governance tokens).
 
-## ⚙️ Usage
+  * **Staking:** Jurors stake tokens to gain eligibility. Higher stake = higher selection probability.
+  * **Rewards:** Jurors who vote with the majority are rewarded.
+  * **Slashing:** Jurors who vote against the majority (incoherent) lose a portion of their stake, incentivizing honest consensus.
 
 1. Go to [Reown Dashboard](https://dashboard.reown.com) and create a new project.
 2. Copy your `Project ID`.
@@ -84,10 +79,52 @@ The connection chain is determined by the explicit `APP_ENV` setting. If no envi
   # NEXT_PUBLIC_APP_ENV=production 
 ```
 
-4. Run `pnpm install` to install dependencies.
-5. Run `pnpm run dev` to start the development server.
+2.  **Install dependencies:**
 
-## Resources
+    ```bash
+    pnpm install
+    ```
 
-- [Reown — Docs](https://docs.reown.com)
-- [Next.js — Docs](https://nextjs.org/docs)
+3.  **Configure Environment:**
+    Rename `.env.example` to `.env.local` and add your keys:
+
+    ```bash
+    NEXT_PUBLIC_PROJECT_ID="YOUR_REOWN_PROJECT_ID"
+    NEXT_PUBLIC_APP_ENV="development" # or 'production' for Mainnet
+
+    # Pinata / IPFS Config
+    NEXT_PUBLIC_PINATA_JWT="your_pinata_jwt"
+    NEXT_PUBLIC_PINATA_GATEWAY_URL="your_gateway_url"
+    ```
+
+4.  **Run Development Server:**
+
+    ```bash
+    pnpm run dev
+    ```
+
+    Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) to launch the Slice App.
+
+-----
+
+## 🧩 Integration Guide (For Developers)
+
+Integrating Slice into your protocol is as simple as 1-2-3:
+
+1.  **Create a Dispute:**
+    Call `slice.createDispute(defender, category, ipfsHash, jurorsRequired)` from your contract.
+2.  **Wait for Ruling:**
+    Slice handles the juror selection, voting, and consensus off-chain and on-chain.
+3.  **Read the Verdict:**
+    Once the dispute status is `Executed`, read the `winner` address from the `disputes` mapping and execute your logic (e.g., release escrow funds).
+
+-----
+
+## 🗺️ Roadmap
+
+  * [x] **Phase 1: Foundation** (Core Contracts, Basic UI, Commit-Reveal)
+  * [ ] **Phase 2: Expansion** (Arbitration Standards, Multiple Court Verticals)
+  * [ ] **Phase 3: Decentralization** (DAO Governance, Permissionless Court Creation)
+  * [ ] **Phase 4: Ecosystem** (SDKs for easy integration with major DeFi/Gig platforms)
+
+-----
