@@ -1,98 +1,88 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  ShieldAlert,
-  Gavel,
-  CreditCard,
   Trophy,
-  ChevronRight,
+  Wallet,
+  TrendingUp,
+  History,
+  Coins,
+  CheckCircle2,
+  XCircle,
   RefreshCw,
-  Hash,
+  Terminal,
   Bug,
-  Terminal, // Imported for the console icon
+  ChevronRight,
+  Lock
 } from "lucide-react";
 import ConnectButton from "@/components/ConnectButton";
 import { useSliceContract } from "@/hooks/useSliceContract";
 import { useXOContracts } from "@/providers/XOContractsProvider";
 import { useQuery } from "@tanstack/react-query";
+import { formatUnits } from "ethers";
 
-export default function ProfilePage() {
+// Mock data for gamification (since not fully on-chain yet)
+const JUROR_LEVELS = ["Novice", "Justiciar", "Magistrate", "High Arbiter"];
+
+export default function JurorProfilePage() {
   const router = useRouter();
   const contract = useSliceContract();
   const { address } = useXOContracts();
-  const [myCases, setMyCases] = useState<any[]>([]);
 
-  // NEW: Fetch User's Cases
-  React.useEffect(() => {
-    const fetchMyCases = async () => {
+  // --- State ---
+  const [jurorHistory, setJurorHistory] = useState<any[]>([]);
+  const [stakedAmount, setStakedAmount] = useState("0");
+  const [earnings, setEarnings] = useState("0");
+  const [coherenceRate, setCoherenceRate] = useState(100); // Mock default
+
+  // --- Fetch Juror Data ---
+  useEffect(() => {
+    const fetchJurorData = async () => {
       if (!contract || !address) return;
       try {
-        const ids = await contract.getUserDisputes(address);
+        // 1. Fetch Staked Amount (Mock: in real contract this would be balanceOf(stakingToken, user))
+        // For now, we simulate active stake based on active disputes or a mock view
+        // const stake = await contract.getStake(address); 
+        setStakedAmount("500.00"); // Mock Value
+        setEarnings("1,240.50");   // Mock Value
 
-        const casesData = await Promise.all(
+        // 2. Fetch Juror History
+        const ids = await contract.getJurorDisputes(address);
+
+        const historyData = await Promise.all(
           ids.map(async (idBg: bigint) => {
             const id = idBg.toString();
             const d = await contract.disputes(id);
-            // Optional: Fetch IPFS title
+            const status = Number(d.status);
+
+            // Determine outcome (Mock logic: if finished, assume coherent for demo)
+            const isFinished = status === 3;
+            const outcome = isFinished ? "Coherent" : "Pending";
+
             return {
               id,
-              role:
-                d.claimer.toLowerCase() === address.toLowerCase()
-                  ? "Claimer"
-                  : "Defender",
-              status: ["Created", "Commit", "Reveal", "Finished"][
-                Number(d.status)
-              ],
               category: d.category,
+              status: ["Created", "Commit", "Reveal", "Resolved"][status],
+              outcome,
+              reward: isFinished ? "+50 USDC" : "Pending",
+              date: "Recently"
             };
-          }),
+          })
         );
-        setMyCases(casesData.reverse()); // Show newest first
+
+        // Filter active vs past
+        setJurorHistory(historyData.reverse());
       } catch (e) {
-        console.error(e);
+        console.error("Error fetching juror profile:", e);
       }
     };
-    fetchMyCases();
+    fetchJurorData();
   }, [contract, address]);
 
-  const [targetDisputeId, setTargetDisputeId] = useState("");
-
-  const {
-    data: latestDisputeId,
-    isLoading: loadingLatest,
-    refetch,
-  } = useQuery({
-    queryKey: ["disputeCount"],
-    queryFn: async () => {
-      if (!contract) return null;
-      const count = await contract.disputeCount();
-      return Number(count);
-    },
-    enabled: !!contract,
-    staleTime: 0,
-  });
-
-  const handleNavigation = (path: string) => {
-    if (path.includes("[id]")) {
-      if (!targetDisputeId) return;
-      router.push(path.replace("[id]", targetDisputeId));
-    } else {
-      router.push(path);
-    }
-  };
-
-  const autofillLatest = () => {
-    if (latestDisputeId !== null && latestDisputeId !== undefined) {
-      setTargetDisputeId(latestDisputeId.toString());
-    }
-  };
-
-  const openConsole = () => {
-    window.dispatchEvent(new Event("open-debug-console"));
-  };
+  // --- Dev Tools Logic ---
+  const openConsole = () => window.dispatchEvent(new Event("open-debug-console"));
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pb-[90px]">
@@ -105,207 +95,166 @@ export default function ProfilePage() {
           <ArrowLeft className="w-5 h-5 text-[#1b1c23]" />
         </button>
         <span className="font-manrope font-extrabold text-lg text-[#1b1c23]">
-          Profile
+          Juror Profile
         </span>
-        <div className="w-10" />
+        <div className="w-10" /> {/* Spacer */}
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-6">
-        {/* --- Profile Card --- */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-[#f5f6f9] overflow-hidden border-4 border-white shadow-lg">
+
+        {/* --- 1. Hero / Reputation Card --- */}
+        <div className="bg-[#1b1c23] rounded-3xl p-6 shadow-lg text-white flex flex-col items-center gap-4 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#8c8fff] opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+          <div className="relative z-10">
+            <div className="w-24 h-24 rounded-full border-4 border-[#8c8fff] p-1 shadow-xl">
               <img
                 src="/images/profiles-mockup/profile-1.png"
-                alt="Profile"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix";
-                }}
+                alt="Juror Avatar"
+                className="w-full h-full object-cover rounded-full"
               />
             </div>
-            <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#8c8fff] rounded-full border-2 border-white flex items-center justify-center">
-              <Trophy className="w-3 h-3 text-white" />
+            <div className="absolute -bottom-2 -right-2 bg-[#8c8fff] text-white text-[10px] font-bold px-2 py-1 rounded-full border-2 border-[#1b1c23]">
+              LVL 5
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-1">
-            <h2 className="font-manrope font-extrabold text-xl text-[#1b1c23]">
-              Welcome Back
+          <div className="flex flex-col items-center gap-1 z-10">
+            <h2 className="font-manrope font-extrabold text-xl">
+              High Arbiter
             </h2>
-            <div className="scale-90">
+            <div className="scale-90 opacity-90 hover:opacity-100 transition-opacity">
               <ConnectButton />
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-3 w-full mt-2">
-            <div className="bg-[#f5f6f9] p-4 rounded-2xl flex flex-col gap-1">
-              <span className="text font-bold text-gray-400 uppercase tracking-wider">
-                Rank
-              </span>
-              <span className="text-md font-semibold text-[#1b1c23]">
-                Justice Lvl 5
-              </span>
+          {/* Gamification Stats */}
+          <div className="grid grid-cols-3 divide-x divide-white/10 w-full mt-2 bg-white/5 rounded-2xl p-3 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Accuracy</span>
+              <span className="text-sm font-bold text-[#4ade80]">{coherenceRate}%</span>
             </div>
-            <div className="bg-[#f5f6f9] p-4 rounded-2xl flex flex-col gap-1">
-              <span className="text font-bold text-gray-400 uppercase tracking-wider">
-                Earnings
-              </span>
-              <span className="text-md font-semibold text-[#1b1c23]">
-                $1,240
-              </span>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Cases</span>
+              <span className="text-sm font-bold">{jurorHistory.length}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Streak</span>
+              <span className="text-sm font-bold text-[#8c8fff]">🔥 3</span>
             </div>
           </div>
         </div>
 
-        {/* NEW SECTION: My Cases */}
-        <div className="flex flex-col gap-3 mt-4">
-          <h3 className="font-manrope font-bold text-gray-800 uppercase tracking-wider ml-1">
-            My Cases
-          </h3>
-
-          {myCases.length === 0 ? (
-            <div className="p-4 text-center text-gray-400 text-sm bg-white rounded-2xl border border-gray-100">
-              No active cases found.
-            </div>
-          ) : (
-            myCases.map((c) => (
-              <div
-                key={c.id}
-                className="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center"
-              >
-                <div>
-                  <div className="font-bold text-[#1b1c23]">
-                    Dispute #{c.id}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {c.role} • {c.category}
-                  </div>
-                </div>
-                <span className="px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600">
-                  {c.status}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* --- Main Actions --- */}
+        {/* --- 2. Staking Center (Financials) --- */}
         <div className="flex flex-col gap-3">
-          <h3 className="font-manrope font-bold text-gray-800 uppercase tracking-wider ml-1">
-            Actions
+          <h3 className="font-manrope font-bold text-gray-800 uppercase tracking-wider ml-1 text-xs flex items-center gap-2">
+            <Wallet className="w-3.5 h-3.5" /> Staking & Earnings
           </h3>
 
-          <button
-            onClick={() => router.push("/create")}
-            className="group w-full bg-white p-4 rounded-[18px] border border-gray-100 shadow-sm flex items-center justify-between hover:bg-gray-50 transition-all active:scale-[0.98]"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#1b1c23] flex items-center justify-center group-hover:shadow-lg transition-all">
-                <ShieldAlert className="w-5 h-5 text-white" />
+          <div className="grid grid-cols-2 gap-3">
+            {/* Stake Card */}
+            <div className="bg-white p-4 rounded-[20px] border border-gray-100 shadow-sm flex flex-col justify-between h-28">
+              <div className="flex justify-between items-start">
+                <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                  <Lock className="w-4 h-4" />
+                </div>
               </div>
-              <div className="flex flex-col items-start">
-                <span className="font-bold text-[#1b1c23]">Create Dispute</span>
-                <span className="text-xs text-gray-500">
-                  Start a new case on-chain
-                </span>
+              <div>
+                <span className="text-xs text-gray-400 font-bold uppercase">Active Stake</span>
+                <div className="text-lg font-extrabold text-[#1b1c23]">{stakedAmount} <span className="text-xs font-normal">USDC</span></div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-300" />
+
+            {/* Earnings Card */}
+            <div className="bg-white p-4 rounded-[20px] border border-gray-100 shadow-sm flex flex-col justify-between h-28">
+              <div className="flex justify-between items-start">
+                <div className="p-2 bg-green-50 rounded-lg text-green-600">
+                  <Coins className="w-4 h-4" />
+                </div>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400 font-bold uppercase">Lifetime Rewards</span>
+                <div className="text-lg font-extrabold text-[#1b1c23]">${earnings}</div>
+              </div>
+            </div>
+          </div>
+
+          <button className="w-full py-3 bg-white border border-gray-200 text-[#1b1c23] rounded-xl font-bold text-xs hover:bg-gray-50 flex items-center justify-center gap-2">
+            Manage Stake <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
         </div>
 
-        {/* --- Testing Tools Zone --- */}
-        <div className="flex flex-col gap-3 pb-8">
-          <div className="flex justify-between items-center ml-1">
-            <h3 className="font-manrope font-bold text-[#8c8fff] uppercase tracking-wider flex items-center gap-2">
-              Dev Tools
+        {/* --- 3. Verdict History (Replaces "My Cases") --- */}
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between items-end">
+            <h3 className="font-manrope font-bold text-gray-800 uppercase tracking-wider ml-1 text-xs flex items-center gap-2">
+              <History className="w-3.5 h-3.5" /> Verdict History
             </h3>
-
-            {/* 2. Updated Header Actions (Debug + Console + Refresh) */}
-            <div className="flex items-center gap-3">
-              {/* Console Trigger Button (New) */}
-              <button
-                onClick={openConsole}
-                className="py-1.5 px-3 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center justify-center shadow-sm active:scale-95"
-                title="Open Console Overlay"
-              >
-                <Terminal className="w-3.5 h-3.5 text-red-500" />
-              </button>
-
-              {/* Debug Page Button */}
-              <button
-                onClick={() => router.push("/debug")}
-                className="py-1.5 px-3 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center justify-center shadow-sm active:scale-95"
-                title="Open Debugger"
-              >
-                <Bug className="w-3.5 h-3.5 text-[#8c8fff]" />
-              </button>
-
-              <button
-                onClick={() => void refetch()}
-                disabled={loadingLatest}
-                className="text-[#8c8fff] hover:bg-[#8c8fff]/10 p-1.5 rounded-full transition-colors active:scale-95"
-                title="Refresh Data"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 ${loadingLatest ? "animate-spin" : ""}`}
-                />
-              </button>
-            </div>
+            <span className="text-[10px] text-[#8c8fff] font-bold cursor-pointer hover:underline">View All</span>
           </div>
 
-          <div className="bg-white p-5 rounded-[18px] border border-gray-100 shadow-sm flex flex-col gap-4">
-            {/* Latest Dispute Info Box */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-[#1b1c23] uppercase flex items-center justify-between">
-                <span className="flex items-center gap-1">
-                  <Hash className="w-3 h-3" /> Target Dispute ID
-                </span>
-                {latestDisputeId !== null && latestDisputeId !== undefined && (
-                  <button
-                    onClick={autofillLatest}
-                    className="text-[14px] text-[#8c8fff] hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    Latest:{" "}
-                    <span className="font-bold">#{latestDisputeId}</span>
-                  </button>
-                )}
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 1"
-                className="w-full bg-[#f5f6f9] p-3 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#8c8fff]"
-                value={targetDisputeId}
-                onChange={(e) => setTargetDisputeId(e.target.value)}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleNavigation("/pay/[id]")}
-                disabled={!targetDisputeId}
-                className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-[#8c8fff] hover:bg-[#8c8fff]/5 transition-all disabled:opacity-50"
-              >
-                <CreditCard className="w-5 h-5 text-[#1b1c23]" />
-                <span className="text-xs font-bold text-[#1b1c23]">
-                  Go to Pay
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleNavigation("/execute-ruling/[id]")}
-                disabled={!targetDisputeId}
-                className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-[#8c8fff] hover:bg-[#8c8fff]/5 transition-all disabled:opacity-50"
-              >
-                <Gavel className="w-5 h-5" />
-                <span className="text-xs font-bold">Execute Ruling</span>
-              </button>
-            </div>
+          <div className="flex flex-col gap-3">
+            {jurorHistory.length === 0 ? (
+              <div className="p-6 text-center bg-white rounded-2xl border border-dashed border-gray-200">
+                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Trophy className="w-6 h-6 text-gray-300" />
+                </div>
+                <p className="text-sm font-bold text-gray-400">No verdicts yet</p>
+                <p className="text-xs text-gray-400 mt-1">Join a dispute to start your career.</p>
+              </div>
+            ) : (
+              jurorHistory.map((item) => (
+                <div key={item.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.outcome === "Coherent" ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                      {item.outcome === "Coherent" ? <CheckCircle2 className="w-5 h-5" /> : <RefreshCw className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-[#1b1c23]">Dispute #{item.id}</h4>
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase">
+                        <span>{item.category}</span>
+                        <span>•</span>
+                        <span>{item.status}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-sm font-bold ${item.outcome === "Coherent" ? "text-green-600" : "text-gray-400"}`}>
+                      {item.reward}
+                    </div>
+                    <div className="text-[10px] text-gray-400 font-medium">
+                      {item.outcome}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
+
+        {/* --- 4. Settings & Dev Tools (Collapsed) --- */}
+        <div className="mt-4 pt-6 border-t border-gray-100">
+          <h3 className="font-manrope font-bold text-gray-400 uppercase tracking-wider ml-1 text-[10px] mb-3">
+            Settings & Tools
+          </h3>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => router.push("/debug")}
+              className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 text-xs font-bold text-gray-600 hover:bg-gray-50"
+            >
+              <Bug className="w-4 h-4 text-[#8c8fff]" /> Debugger
+            </button>
+            <button
+              onClick={openConsole}
+              className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 text-xs font-bold text-gray-600 hover:bg-gray-50"
+            >
+              <Terminal className="w-4 h-4 text-gray-500" /> Console
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );
