@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Hash,
   Bug,
+  Terminal, // Imported for the console icon
 } from "lucide-react";
 import ConnectButton from "@/components/ConnectButton";
 import { useSliceContract } from "@/hooks/useSliceContract";
@@ -87,6 +88,10 @@ export default function ProfilePage() {
     if (latestDisputeId !== null && latestDisputeId !== undefined) {
       setTargetDisputeId(latestDisputeId.toString());
     }
+  };
+
+  const openConsole = () => {
+    window.dispatchEvent(new Event("open-debug-console"));
   };
 
   return (
@@ -219,8 +224,18 @@ export default function ProfilePage() {
               Dev Tools
             </h3>
 
-            {/* 2. Updated Header Actions (Debug + Refresh) */}
+            {/* 2. Updated Header Actions (Debug + Console + Refresh) */}
             <div className="flex items-center gap-3">
+              {/* Console Trigger Button (New) */}
+              <button
+                onClick={openConsole}
+                className="py-1.5 px-3 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center justify-center shadow-sm active:scale-95"
+                title="Open Console Overlay"
+              >
+                <Terminal className="w-3.5 h-3.5 text-red-500" />
+              </button>
+
+              {/* Debug Page Button */}
               <button
                 onClick={() => router.push("/debug")}
                 className="py-1.5 px-3 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center justify-center shadow-sm active:scale-95"
@@ -228,6 +243,7 @@ export default function ProfilePage() {
               >
                 <Bug className="w-3.5 h-3.5 text-[#8c8fff]" />
               </button>
+
               <button
                 onClick={() => void refetch()}
                 disabled={loadingLatest}
@@ -242,8 +258,6 @@ export default function ProfilePage() {
           </div>
 
           <div className="bg-white p-5 rounded-[18px] border border-gray-100 shadow-sm flex flex-col gap-4">
-            {/* 3. Removed the big black "Contract Debugger" button here */}
-
             {/* Latest Dispute Info Box */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-[#1b1c23] uppercase flex items-center justify-between">
