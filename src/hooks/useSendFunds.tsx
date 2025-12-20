@@ -98,7 +98,8 @@ export function useSendFunds(onSuccess?: () => void) {
           onSuccess?.();
         } catch (err: any) {
           console.error("Embedded Send Error:", err);
-          toast.error(err.reason || err.message || "Transfer failed");
+          const detailedError = err.reason || err.shortMessage || err.message || JSON.stringify(err);
+          toast.error(`Transfer Failed: ${detailedError}`);
         } finally {
           setIsEmbeddedLoading(false);
         }

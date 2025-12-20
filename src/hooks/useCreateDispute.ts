@@ -60,7 +60,12 @@ export function useCreateDispute() {
       return true; // SUCCESS
     } catch (error) {
       console.error("Error creating dispute:", error);
-      toast.error("Failed to create dispute");
+      const detailedError =
+        (error as any).reason ||
+        (error as any).shortMessage ||
+        (error as any).message ||
+        "Unknown error";
+      toast.error(`Create Failed: ${detailedError}`);
       return false; // FAILURE
     } finally {
       setIsCreating(false);

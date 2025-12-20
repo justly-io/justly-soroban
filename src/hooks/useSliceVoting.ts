@@ -45,8 +45,8 @@ export const useSliceVoting = () => {
       return true;
     } catch (error: any) {
       console.error("Commit Error:", error);
-      const msg = error.reason || error.message || "Failed to commit vote";
-      toast.error(msg);
+      const msg = (error as any).reason || (error as any).shortMessage || (error as any).message || "Failed to commit vote";
+      toast.error(`Commit Error: ${msg}`);
       setLogs(`Error: ${msg}`);
       return false;
     } finally {
@@ -86,13 +86,9 @@ export const useSliceVoting = () => {
       return true;
     } catch (error: any) {
       console.error("Reveal Error:", error);
-      const msg = error.reason || error.message || "Failed to reveal vote";
-
-      if (msg.includes("No local vote data")) {
-        toast.error("Missing Salt: Did you vote on a previous contract deployment?");
-      } else {
-        toast.error(msg);
-      }
+      const msg = (error as any).reason || (error as any).shortMessage || (error as any).message || "Failed to reveal vote";
+      toast.error(`Reveal Error: ${msg}`);
+      setLogs(`Error: ${msg}`);
 
       setLogs(`Error: ${msg}`);
       return false;

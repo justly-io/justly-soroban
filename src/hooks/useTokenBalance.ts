@@ -6,6 +6,7 @@ import { Contract, formatUnits } from "ethers";
 import { useEmbedded } from "@/providers/EmbeddedProvider";
 import { useXOContracts } from "@/providers/XOContractsProvider";
 import { erc20Abi } from "@/contracts/erc20-abi";
+import { toast } from "sonner";
 
 export function useTokenBalance(tokenAddress: string | undefined) {
   const { isEmbedded } = useEmbedded();
@@ -60,6 +61,8 @@ export function useTokenBalance(tokenAddress: string | undefined) {
       } catch (error) {
         console.error("Failed to fetch embedded balance", error);
         setEmbeddedBalance(null);
+        // ADD THIS: Show detailed error in toast
+        toast.error(`Balance Fetch Error: ${(error as any).reason || (error as any).message || error}`);
       } finally {
         setIsEmbeddedLoading(false);
       }

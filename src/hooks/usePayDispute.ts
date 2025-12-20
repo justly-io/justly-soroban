@@ -80,14 +80,15 @@ export function usePayDispute() {
     } catch (err: any) {
       console.error("Pay Dispute Error:", err);
 
-      const msg = err.reason || err.message || "Unknown error";
+      const msg = err.reason || err.shortMessage || err.message || "Unknown error";
 
+      // Keep your specific checks but append the raw error for debugging
       if (msg.includes("exceeds allowance")) {
-        toast.error("Error: Token allowance insufficient.");
+        toast.error(`Error: Token allowance insufficient. (${msg})`);
       } else if (msg.includes("Wrong phase")) {
-        toast.error("Error: Dispute is not in the payment phase.");
+        toast.error(`Error: Dispute is not in the payment phase. (${msg})`);
       } else {
-        toast.error(`Payment failed: ${msg.slice(0, 60)}...`);
+        toast.error(`Payment failed: ${msg}`);
       }
       return false;
     } finally {

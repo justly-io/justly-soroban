@@ -146,13 +146,13 @@ export function useAssignDispute() {
       return true;
     } catch (error: any) {
       console.error("Join Error:", error);
-      const msg = error.reason || error.message || "Transaction failed";
-      if (msg.includes("user rejected") || msg.includes("User rejected")) {
+      const msg = error.reason || error.shortMessage || error.message || "Transaction failed";
+
+      // Update generic error to include details
+      if (msg.includes("user rejected")) {
         toast.error("Transaction cancelled by user.");
-      } else if (msg.includes("missing revert data")) {
-        toast.error("Network error: Please try again.");
       } else {
-        toast.error(`Error: ${msg.slice(0, 60)}...`);
+        toast.error(`Join Failed: ${msg}`);
       }
       return false;
     } finally {

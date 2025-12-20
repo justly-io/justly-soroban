@@ -38,14 +38,8 @@ export function useExecuteRuling() {
       }
     } catch (err: any) {
       console.error("Execution Error:", err);
-
-      // Handle common contract reverts
-      const msg = err.reason || err.message || "Unknown error";
-      if (msg.includes("Wrong phase")) {
-        toast.error("Cannot execute yet. Dispute is not in Reveal phase.");
-      } else {
-        toast.error(`Execution failed: ${msg}`);
-      }
+      const msg = err.reason || err.shortMessage || err.message || "Unknown error";
+      toast.error(`Execution Failed: ${msg}`);
       return null;
     } finally {
       setIsExecuting(false);
