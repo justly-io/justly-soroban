@@ -46,7 +46,6 @@ export const XOContractsProvider = ({ children }: { children: ReactNode }) => {
   const initializationAttempted = useRef(false);
 
   // --- Web/Wagmi State ---
-  // Use useAccount for address state (UI), useWalletClient for signer (TXs)
   const { address: wagmiAddress, isConnected, chain } = useAccount();
   const { switchChain } = useSwitchChain();
   const { data: walletClient } = useWalletClient();
@@ -90,7 +89,7 @@ export const XOContractsProvider = ({ children }: { children: ReactNode }) => {
     [activeChain],
   );
 
-  // 2. AUTO-CONNECT EFFECT
+  // 2. AUTO-CONNECT EFFECT (Embedded)
   useEffect(() => {
     if (isEmbedded && !xoAddress && !initializationAttempted.current) {
       initializationAttempted.current = true;
@@ -99,46 +98,35 @@ export const XOContractsProvider = ({ children }: { children: ReactNode }) => {
   }, [isEmbedded, xoAddress, connectXO]);
 
   // 3. Wagmi/Privy Logic (Web)
-  // Updated effect to rely on isConnected/wagmiAddress for UI state
-  // src/providers/XOContractsProvider.tsx
-
   useEffect(() => {
     if (!isEmbedded) {
-      // DEBUG LOGS START
-      console.log("[XOProvider] Debug State:", {
-        isConnected,
-        hasWagmiAddress: !!wagmiAddress,
-        wagmiAddress,
-        hasWalletClient: !!walletClient,
-        chainId: walletClient?.chain?.id,
-      });
-      // DEBUG LOGS END
-
+      // 3a. Handle Address (Read-only UI) - Updates immediately
       if (isConnected && wagmiAddress) {
-        // CASE: Connected but on the wrong network (WalletClient is missing)
-        if (!walletClient && chain?.id !== defaultChain.id) {
+        setActiveAddress(wagmiAddress);
+      } else {
+        setActiveAddress(null);
+        setActiveSigner(null); // Clear signer if disconnected
+        return;
+      }
+
+      // 3b. Handle Signer (Write actions) - Updates when walletClient is ready
+      if (isConnected && walletClient) {
+        // Network Check
+        if (chain?.id !== defaultChain.id) {
           console.warn(
-            `[XOProvider] Wrong Network detected (${chain?.id}). Switching to ${defaultChain.id}...`,
+            `[XOProvider] Wrong Network detected (${chain?.id}). Switching...`,
           );
           switchChain({ chainId: defaultChain.id });
           return;
         }
 
-        // CASE: Connected & Correct Network -> Create Signer
-        if (walletClient) {
-          try {
-            const signer = walletClientToSigner(walletClient);
-            console.log("[XOProvider] Signer created successfully");
-            setActiveSigner(signer);
-            setActiveAddress(wagmiAddress);
-          } catch (e) {
-            console.error("[XOProvider] Error creating signer:", e);
-            setActiveSigner(null);
-          }
+        try {
+          const signer = walletClientToSigner(walletClient);
+          setActiveSigner(signer);
+        } catch (e) {
+          console.error("[XOProvider] Error creating signer:", e);
+          setActiveSigner(null);
         }
-      } else {
-        setActiveAddress(null);
-        setActiveSigner(null);
       }
     }
   }, [isEmbedded, isConnected, wagmiAddress, walletClient, chain, switchChain]);
