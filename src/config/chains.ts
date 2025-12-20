@@ -50,18 +50,19 @@ export const SUPPORTED_CHAINS: ChainConfig[] = [
   },
 ];
 
-// Determine the default environment (Safe fallback to first item)
-export const DEFAULT_CHAIN_CONFIG = SUPPORTED_CHAINS[0];
+const isProd = process.env.NEXT_PUBLIC_APP_ENV === "production";
 
-// EXPORT CLEAN VARIABLES FOR LIBRARIES (Wagmi / Privy)
-// This extracts just the chain objects (e.g. [baseSepolia, scrollSepolia])
+// Example: Select Base Mainnet (8453) for Prod, Base Sepolia (84532) for Dev
+const defaultChainId = isProd ? base.id : baseSepolia.id;
+
+export const DEFAULT_CHAIN_CONFIG =
+  SUPPORTED_CHAINS.find((c) => c.chain.id === defaultChainId) ||
+  SUPPORTED_CHAINS[0];
+
 export const activeChains = SUPPORTED_CHAINS.map((c) => c.chain) as [
   Chain,
   ...Chain[],
 ];
 
-// Helper to get the default/active chain (usually the first one in the list for dev)
 export const defaultChain = DEFAULT_CHAIN_CONFIG.chain;
-
-// Full Config (Used by components for contract addresses)
-export const DEFAULT_CHAIN = SUPPORTED_CHAINS[0];
+export const DEFAULT_CHAIN = DEFAULT_CHAIN_CONFIG;
