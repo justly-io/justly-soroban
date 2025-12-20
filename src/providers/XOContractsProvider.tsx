@@ -76,7 +76,20 @@ export const XOContractsProvider = ({ children }: { children: ReactNode }) => {
         console.log("🙏 Requesting accounts...");
         await provider.request({ method: "eth_requestAccounts" });
 
+        // 2. ⚡ FORCE CHAIN SWITCH TO HEX ID ⚡
+        // This ensures the wallet is definitely on Base (0x2105) and not Ethereum (0x1)
+        try {
+          console.log(`🔀 Switching Chain to ${chainIdHex}...`);
+          await provider.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: chainIdHex }],
+          });
+        } catch (switchErr) {
+          console.warn("⚠️ Chain switch warning (might already be on chain):", switchErr);
+        }
+
         console.log("🛠 Creating Ethers Provider...");
+        // Pass "any" to allow Ethers to accept the network even if it changed
         const ethersProvider = new BrowserProvider(provider, "any");
 
         console.log("✍️ Getting Signer...");
