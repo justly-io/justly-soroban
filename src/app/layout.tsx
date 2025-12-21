@@ -8,7 +8,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { TimerProvider } from "@/contexts/TimerContext";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { ConsoleOverlay } from "@/components/debug/ConsoleOverlay";
-import { NetworkDebugger } from "@/components/debug/NetworkDebugger";
+import {DebugToggle} from "@/components/debug/DebugToggle";
 
 export const metadata: Metadata = {
   title: "Slice",
@@ -65,7 +65,7 @@ export default async function RootLayout({
                   {process.env.NEXT_PUBLIC_IS_EMBEDDED === "true" && (
                     <ConsoleOverlay />
                   )}
-                  <NetworkDebugger />
+                  <DebugToggle />
                 </div>
               </TimerProvider>
             </ConnectProvider>
