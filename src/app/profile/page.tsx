@@ -58,7 +58,7 @@ export default function ProfilePage() {
 
       <div className="flex-1 px-6 flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* --- 1. Hero Card --- */}
-        <div className="relative w-full rounded-[32px] p-1 bg-gradient-to-b from-gray-100 to-white shadow-xl shadow-gray-200/50">
+        <div className="relative w-full rounded-4xl p-1 bg-linear-to-b from-gray-100 to-white shadow-xl shadow-gray-200/50">
           <div className="bg-[#1b1c23] rounded-[30px] p-6 pb-8 text-white flex flex-col items-center gap-6 relative overflow-hidden">
             {/* Ambient Background Glows */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#8c8fff] opacity-10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
@@ -66,7 +66,7 @@ export default function ProfilePage() {
 
             {/* Avatar Section */}
             <div className="relative z-10 mt-2">
-              <div className="w-28 h-28 rounded-full p-[4px] bg-gradient-to-br from-[#8c8fff] to-blue-500 shadow-2xl relative">
+              <div className="w-28 h-28 rounded-full p-1 bg-linear-to-br from-[#8c8fff] to-blue-500 shadow-2xl relative">
                 <div className="w-full h-full rounded-full border-[3px] border-[#1b1c23] overflow-hidden bg-[#2c2d33]">
                   <img
                     src="/images/profiles-mockup/profile-1.jpg"
@@ -75,7 +75,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 {/* Level Badge */}
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#8c8fff] to-[#7a7de0] text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-lg border-[3px] border-[#1b1c23] z-20 whitespace-nowrap">
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-linear-to-r from-[#8c8fff] to-[#7a7de0] text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-lg border-[3px] border-[#1b1c23] z-20 whitespace-nowrap">
                   LVL 5 JUROR
                 </div>
               </div>
@@ -138,7 +138,7 @@ export default function ProfilePage() {
           <h3 className="font-manrope font-extrabold text-gray-800 uppercase tracking-wide ml-1">
             Performance & Rewards
           </h3>
-          <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 flex items-center justify-between group transition-all hover:shadow-md">
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group transition-all hover:shadow-md">
             <div>
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
                 Lifetime Earnings

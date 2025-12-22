@@ -112,13 +112,11 @@ const ConnectButton = () => {
               >
                 {copied ? (
                   <>
-                    {" "}
-                    <Check className="mr-2 h-3.5 w-3.5" /> Copied{" "}
+                    <Check className="mr-2 h-3.5 w-3.5" /> Copied
                   </>
                 ) : (
                   <>
-                    {" "}
-                    <Copy className="mr-2 h-3.5 w-3.5" /> Copy Address{" "}
+                    <Copy className="mr-2 h-3.5 w-3.5" /> Copy Address
                   </>
                 )}
               </Button>

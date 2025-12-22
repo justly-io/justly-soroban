@@ -12,7 +12,7 @@ import {
   Eye,
   CheckCircle2,
   User,
-  ShieldAlert,
+  Shield,
   Lock,
   Scale,
 } from "lucide-react";
@@ -58,9 +58,10 @@ export default function VotePage() {
 
   const handleAnimationComplete = () => {
     setShowSuccessAnimation(false);
-    router.push("/");
+    router.push("/disputes");
   };
 
+  // Helper to map role to UI assets
   const getPartyInfo = (role: "claimer" | "defender") => {
     if (role === "claimer") {
       return {
@@ -68,8 +69,9 @@ export default function VotePage() {
           ? `${dispute.claimer.slice(0, 6)}...${dispute.claimer.slice(-4)}`
           : "Julio Banegas",
         roleLabel: "Claimant",
-        avatarBg: "bg-[#EFF6FF]",
-        iconColor: "text-[#2563EB]",
+        avatarUrl: "/images/profiles-mockup/profile-1.jpg", // Consistent with other pages
+        fallbackIcon: <User className="w-8 h-8 text-blue-600" />,
+        themeColor: "blue",
       };
     }
     return {
@@ -77,8 +79,9 @@ export default function VotePage() {
         ? `${dispute.defender.slice(0, 6)}...${dispute.defender.slice(-4)}`
         : "Micaela Descotte",
       roleLabel: "Defendant",
-      avatarBg: "bg-[#F3F4F6]",
-      iconColor: "text-[#374151]",
+      avatarUrl: "/images/profiles-mockup/profile-2.jpg",
+      fallbackIcon: <Shield className="w-8 h-8 text-gray-600" />,
+      themeColor: "gray",
     };
   };
 
@@ -87,54 +90,58 @@ export default function VotePage() {
 
   return (
     <div className="flex flex-col h-screen bg-[#F8F9FC]" {...handlers}>
-      <DisputeOverviewHeader onBack={handleBack} />
-      <TimerCard />
+      {/* 1. Fixed Header */}
+      <div className="flex-none z-10 bg-[#F8F9FC]/80 backdrop-blur-md">
+        <DisputeOverviewHeader onBack={handleBack} />
+        <TimerCard />
+      </div>
 
-      <div className="flex-1 overflow-y-auto p-5 pb-40">
-        {/* Centered Container limiting width */}
-        <div className="flex flex-col gap-5 h-full max-w-sm mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center px-2 mt-2">
+      {/* 2. Scrollable Content */}
+      <div className="flex-1 overflow-y-auto px-5 pb-40 pt-2 scrollbar-hide">
+        <div className="flex flex-col gap-6 max-w-sm mx-auto h-full">
+          {/* Page Title */}
+          <div className="flex justify-between items-end px-1 mt-2">
             <div>
-              <h2 className="text-xl font-extrabold text-[#1b1c23]">
-                Make your Ruling
+              <h2 className="text-2xl font-extrabold text-[#1b1c23] leading-tight">
+                Make your
+                <br />
+                Ruling
               </h2>
-              <p className="text-[11px] font-semibold text-gray-400">
-                Select the winner below.
+              <p className="text-xs font-bold text-gray-400 mt-1">
+                Review the evidence and select a winner.
               </p>
             </div>
             <button
               onClick={() => void handleRefresh()}
               disabled={isRefreshing || isProcessing}
-              className="p-2 rounded-full bg-white border border-gray-100 shadow-sm text-[#8c8fff] active:scale-90 transition-transform"
+              className="p-2.5 rounded-full bg-white border border-gray-100 shadow-sm text-[#8c8fff] active:scale-90 transition-transform hover:bg-gray-50"
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
               />
             </button>
           </div>
 
-          {/* CARDS GRID */}
-          <div className="flex flex-col gap-4 flex-1 justify-center min-h-[300px]">
+          {/* VOTING CARDS AREA */}
+          <div className="flex flex-col gap-5 relative flex-1 min-h-[320px]">
             {/* CLAIMANT CARD */}
             <VoteOptionCard
               isSelected={selectedVote === 1}
               isCommitted={hasCommittedLocally}
               onClick={() => handleVoteSelect(1)}
               info={claimerInfo}
-              voteIndex={1}
             />
 
-            {/* VS Badge */}
-            {selectedVote === null && !hasCommittedLocally && (
-              <div className="relative flex items-center justify-center -my-6 z-10 pointer-events-none opacity-40">
-                <div className="bg-white px-2 py-0.5 rounded-full border border-gray-100 shadow-sm">
-                  <span className="text-[9px] font-black text-gray-300 tracking-widest">
+            {/* VS Badge (Absolute Center) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+              <div className="bg-white p-1 rounded-full shadow-sm border border-gray-100">
+                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                  <span className="text-[9px] font-black text-gray-200">
                     VS
                   </span>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* DEFENDANT CARD */}
             <VoteOptionCard
@@ -142,30 +149,32 @@ export default function VotePage() {
               isCommitted={hasCommittedLocally}
               onClick={() => handleVoteSelect(0)}
               info={defenderInfo}
-              voteIndex={0}
             />
           </div>
 
-          {/* Processing Indicator */}
+          {/* STATUS NOTIFICATIONS */}
+
+          {/* Processing */}
           {isProcessing && (
-            <div className="mx-auto flex items-center gap-2 text-[10px] font-bold text-[#8c8fff] animate-pulse bg-white px-3 py-1.5 rounded-full shadow-sm">
+            <div className="mx-auto flex items-center gap-2 text-[10px] font-bold text-[#8c8fff] animate-pulse bg-white px-4 py-2 rounded-full shadow-sm border border-[#8c8fff]/20">
               <RefreshCw className="w-3 h-3 animate-spin" />
-              <span>PROCESSING ON-CHAIN...</span>
+              <span>SECURING VOTE ON-CHAIN...</span>
             </div>
           )}
 
-          {/* Locked State Notification */}
+          {/* Vote Locked (Committed) */}
           {hasCommittedLocally && (
-            <div className="bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-bottom-2 mx-auto w-full">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                <Lock className="w-4 h-4" />
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm animate-in fade-in slide-in-from-bottom-2 mx-auto w-full">
+              <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 border border-indigo-100">
+                <Lock className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-xs text-[#1b1c23]">
+                <h4 className="font-extrabold text-sm text-[#1b1c23]">
                   Vote Secured
                 </h4>
-                <p className="text-[10px] text-gray-500">
-                  Reveal it in the next phase.
+                <p className="text-xs text-gray-500 font-medium leading-tight">
+                  Your decision is encrypted. You must reveal it in the next
+                  phase.
                 </p>
               </div>
             </div>
@@ -173,37 +182,54 @@ export default function VotePage() {
         </div>
       </div>
 
-      {/* Floating Bottom Action Bar */}
-      <div className="fixed bottom-[85px] left-0 right-0 px-5 z-20 flex justify-center">
-        <div className="flex flex-col gap-3 w-full max-w-sm">
+      {/* 3. Floating Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-white via-white/95 to-transparent z-20 flex justify-center pb-8">
+        <div className="w-full max-w-sm flex flex-col gap-4">
+          {/* Pagination */}
+          <div className="mb-2">
+            <PaginationDots currentIndex={3} total={4} />
+          </div>
+
+          {/* Main Action Button */}
           {!hasCommittedLocally ? (
             <button
               className={`
-                    w-full py-3.5 px-6 rounded-xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg
-                    flex items-center justify-center gap-2 border-b-4
-                    ${isCommitDisabled
-                  ? "bg-white text-gray-300 border-gray-100 cursor-not-allowed shadow-none"
-                  : "bg-[#1b1c23] text-white border-[#000000] hover:-translate-y-0.5 active:translate-y-0 active:border-b-0"
+                w-full py-4 px-6 rounded-2xl font-manrope font-semibold tracking-wide transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(27,28,35,0.2)]
+                flex items-center justify-center gap-2
+                ${
+                  isCommitDisabled
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none"
+                    : "bg-[#1b1c23] text-white hover:scale-[1.02] active:scale-[0.98]"
                 }
-                `}
+              `}
               onClick={() => void onCommitClick()}
               disabled={isCommitDisabled}
             >
-              <Scale className="w-4 h-4" />
-              {isProcessing ? "COMMITTING..." : "COMMIT VOTE"}
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>COMMITTING...</span>
+                </>
+              ) : (
+                <>
+                  <Scale className="w-4 h-4" />
+                  <span>COMMIT VOTE</span>
+                </>
+              )}
             </button>
           ) : (
             <button
               onClick={() => router.push(`/reveal/${disputeId}`)}
               disabled={isRevealDisabled}
               className={`
-                    w-full py-3.5 px-6 rounded-xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg
-                    flex items-center justify-center gap-2 border-b-4
-                    ${isRevealDisabled
-                  ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                  : "bg-[#8c8fff] text-white border-[#7073db] hover:-translate-y-0.5"
-                }
-                    `}
+                        w-full py-4 px-6 rounded-2xl font-manrope font-semibold tracking-wide transition-all duration-300
+                        flex items-center justify-center gap-2
+                        ${
+                          isRevealDisabled
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none"
+                            : "bg-[#1b1c23] text-white shadow-[0_8px_20px_-6px_rgba(27,28,35,0.2)] hover:scale-[1.02] active:scale-[0.98]"
+                        }
+                        `}
             >
               <Eye className="w-4 h-4" />
               <span>GO TO REVEAL</span>
@@ -213,8 +239,6 @@ export default function VotePage() {
         </div>
       </div>
 
-      <PaginationDots currentIndex={3} total={4} />
-
       {showSuccessAnimation && (
         <SuccessAnimation onComplete={handleAnimationComplete} />
       )}
@@ -222,18 +246,18 @@ export default function VotePage() {
   );
 }
 
-// --- CARD COMPONENT ---
+// --- MODERN CARD COMPONENT ---
 
 interface VoteOptionCardProps {
   isSelected: boolean;
   isCommitted: boolean;
   onClick: () => void;
-  voteIndex: number;
   info: {
     name: string;
     roleLabel: string;
-    avatarBg: string;
-    iconColor: string;
+    avatarUrl: string;
+    fallbackIcon: React.ReactNode;
+    themeColor: string;
   };
 }
 
@@ -242,11 +266,11 @@ function VoteOptionCard({
   isCommitted,
   onClick,
   info,
-  voteIndex,
 }: VoteOptionCardProps) {
+  // Dynamic Styles
   const containerStyle = isSelected
-    ? `border-[#1b1c23] bg-white ring-1 ring-[#1b1c23] shadow-md scale-[1.02]`
-    : "border-transparent bg-white hover:border-gray-200 shadow-sm";
+    ? `border-gray-800 bg-white ring-2 ring-gray-800 shadow-lg scale-[1.02] z-10`
+    : "border-transparent bg-white shadow-[0_4px_20px_-12px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100";
 
   const disabledStyle =
     isCommitted && !isSelected
@@ -258,55 +282,68 @@ function VoteOptionCard({
       onClick={onClick}
       disabled={isCommitted}
       className={`
-        relative w-full rounded-2xl border-2 transition-all duration-300 ease-out group
-        flex flex-col items-center justify-center py-5 px-4 min-h-[140px]
+        relative w-full rounded-[24px] p-4 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group
+        flex items-center gap-4 h-[100px]
         ${containerStyle}
         ${disabledStyle}
       `}
     >
-      {/* Checkmark Badge */}
-      <div
-        className={`
-        absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300
-        ${isSelected
-            ? "bg-[#1b1c23] border-[#1b1c23] scale-100 opacity-100"
-            : "border-gray-200 bg-transparent scale-90 opacity-0"
-          }
-      `}
-      >
-        <CheckCircle2 className="w-3 h-3 text-white" />
-      </div>
-
-      {/* Avatar */}
-      <div
-        className={`
-        w-14 h-14 rounded-xl ${info.avatarBg}
-        flex items-center justify-center mb-3
-        transition-transform duration-300 group-hover:scale-105
-      `}
-      >
-        {voteIndex === 1 ? (
-          <User className={`w-7 h-7 ${info.iconColor}`} />
-        ) : (
-          <ShieldAlert className={`w-7 h-7 ${info.iconColor}`} />
-        )}
-      </div>
-
-      {/* Text */}
-      <div className="flex flex-col items-center text-center gap-0.5">
-        <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
+      {/* 1. Avatar Section */}
+      <div className="relative shrink-0">
+        <div className="w-16 h-16 rounded-2xl bg-gray-50 overflow-hidden border border-gray-100 shadow-inner flex items-center justify-center">
+          <img
+            src={info.avatarUrl}
+            alt={info.roleLabel}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to icon if image fails
+              e.currentTarget.style.display = "none";
+              e.currentTarget.nextElementSibling?.classList.remove("hidden");
+            }}
+          />
+          <div className="hidden w-full h-full flex items-center justify-center bg-gray-50">
+            {info.fallbackIcon}
+          </div>
+        </div>
+        {/* Role Badge (Small pill) */}
+        <div
+          className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border border-white shadow-sm whitespace-nowrap bg-${info.themeColor}-50 text-${info.themeColor}-600`}
+        >
           {info.roleLabel}
-        </span>
+        </div>
+      </div>
+
+      {/* 2. Text Content */}
+      <div className="flex-1 text-left">
         <span
-          className={`text-lg font-bold transition-colors ${isSelected ? "text-[#1b1c23]" : "text-gray-700"}`}
+          className={`block text-[10px] font-bold uppercase tracking-widest mb-0.5 transition-colors ${isSelected ? "text-[#1b1c23]" : "text-gray-400"}`}
+        >
+          Vote For
+        </span>
+        <h3
+          className={`text-lg font-extrabold leading-tight transition-colors ${isSelected ? "text-[#1b1c23]" : "text-gray-700"}`}
         >
           {info.name}
-        </span>
+        </h3>
       </div>
 
-      {/* Subtle BG Overlay */}
+      {/* 3. Selection Indicator (Checkmark) */}
+      <div
+        className={`
+        w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300
+        ${
+          isSelected
+            ? "bg-[#1b1c23] border-[#1b1c23] scale-100 opacity-100 shadow-md"
+            : "border-gray-100 bg-transparent scale-90 opacity-0"
+        }
+      `}
+      >
+        <CheckCircle2 className="w-4 h-4 text-white" />
+      </div>
+
+      {/* Subtle BG Flash on Selection */}
       {isSelected && (
-        <div className="absolute inset-0 bg-[#1b1c23]/[0.02] pointer-events-none rounded-2xl" />
+        <div className="absolute inset-0 bg-[#1b1c23]/[0.02] pointer-events-none rounded-[24px]" />
       )}
     </button>
   );

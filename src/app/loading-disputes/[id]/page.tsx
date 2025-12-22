@@ -32,7 +32,7 @@ export default function LoadingDisputesPage() {
           />
         </div>
         <p className="text-lg font-medium text-gray-600">
-          Loading disputes for you...
+          Setting up case files...
         </p>
       </div>
     </div>

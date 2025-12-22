@@ -5,28 +5,29 @@ import { useRouter } from "next/navigation";
 import {
   Gavel,
   Eye,
-  AlertCircle,
   Loader2,
   ArrowLeft,
   Wallet,
   CheckCircle2,
-  FileText,
-  Banknote,
+  ArrowRight,
+  Coins,
+  ShieldAlert,
+  Zap,
 } from "lucide-react";
 import { fetchJSONFromIPFS } from "@/util/ipfs";
 import { useSliceContract } from "@/hooks/useSliceContract";
 import { useConnect } from "@/providers/ConnectProvider";
 import { hasLocalVote } from "@/util/votingStorage";
+import { formatUnits } from "ethers";
 
 interface Task {
   id: string;
   title: string;
   category: string;
-  phase: "VOTE" | "REVEAL" | "WITHDRAW"; // Added WITHDRAW phase
+  phase: "VOTE" | "REVEAL" | "WITHDRAW";
   deadlineLabel: string;
-  statusColor: string;
-  bgColor: string;
-  icon: React.ReactNode;
+  isUrgent: boolean;
+  stake: string;
 }
 
 export default function MyVotesPage() {
@@ -50,40 +51,32 @@ export default function MyVotesPage() {
           disputeIds.map(async (idBigInt: bigint) => {
             const id = idBigInt.toString();
             const d = await contract.disputes(id);
-            const status = Number(d.status); // 0=Created, 1=Commit, 2=Reveal, 3=Finished
+            const status = Number(d.status);
 
-            // --- FILTERING LOGIC: Is this actionable? ---
             const hasRevealed = await contract.hasRevealed(id, address);
             const localSecretExists = hasLocalVote(contractAddr, id, address);
             const now = Math.floor(Date.now() / 1000);
 
             let isActionable = false;
-            let phase: Task["phase"] = "VOTE"; // Default
+            let phase: Task["phase"] = "VOTE";
             let deadline = 0;
 
-            // CASE 1: COMMIT PHASE (1) & No Local Vote Secret found
             if (status === 1 && !localSecretExists) {
               isActionable = true;
               phase = "VOTE";
               deadline = Number(d.commitDeadline);
-            }
-            // CASE 2: REVEAL PHASE (2) & Has Local Secret & Not Revealed On-Chain
-            else if (status === 2 && localSecretExists && !hasRevealed) {
+            } else if (status === 2 && localSecretExists && !hasRevealed) {
               isActionable = true;
               phase = "REVEAL";
               deadline = Number(d.revealDeadline);
-            }
-            // CASE 3: READY TO EXECUTE/WITHDRAW (Status 2 & Reveal Deadline Passed)
-            else if (status === 2 && now > Number(d.revealDeadline)) {
+            } else if (status === 2 && now > Number(d.revealDeadline)) {
               isActionable = true;
               phase = "WITHDRAW";
-              deadline = Number(d.revealDeadline); // Show as expired/ready
+              deadline = Number(d.revealDeadline);
             }
 
-            // If not actionable, return null (to be filtered out)
             if (!isActionable) return null;
 
-            // --- If we are here, it's a valid task. Fetch metadata. ---
             let title = `Dispute #${id}`;
             if (d.ipfsHash) {
               const meta = await fetchJSONFromIPFS(d.ipfsHash);
@@ -91,54 +84,28 @@ export default function MyVotesPage() {
             }
 
             const diff = deadline - now;
+            const isUrgent = diff < 86400 && diff > 0;
             let deadlineLabel = "";
 
             if (phase === "WITHDRAW") {
-              deadlineLabel = "Ready to Withdraw";
+              deadlineLabel = "Ready to Claim";
             } else {
-              deadlineLabel =
-                diff > 0
-                  ? `${Math.ceil(diff / 3600)}h remaining`
-                  : "Ending soon";
-            }
-
-            // Styling based on phase
-            let style = { color: "", bg: "", icon: null as React.ReactNode };
-
-            if (phase === "VOTE") {
-              style = {
-                color: "text-blue-600",
-                bg: "bg-blue-50",
-                icon: <Gavel className="w-5 h-5" />,
-              };
-            } else if (phase === "REVEAL") {
-              style = {
-                color: "text-purple-600",
-                bg: "bg-purple-50",
-                icon: <Eye className="w-5 h-5" />,
-              };
-            } else if (phase === "WITHDRAW") {
-              style = {
-                color: "text-indigo-600",
-                bg: "bg-indigo-50",
-                icon: <Banknote className="w-5 h-5" />,
-              };
+              const hours = Math.ceil(diff / 3600);
+              deadlineLabel = diff > 0 ? `${hours}h left` : "Ending soon";
             }
 
             return {
               id,
               title,
-              category: d.category,
+              category: d.category || "General",
               phase,
               deadlineLabel,
-              statusColor: style.color,
-              bgColor: style.bg,
-              icon: style.icon,
+              isUrgent,
+              stake: d.requiredStake ? formatUnits(d.requiredStake, 6) : "0",
             };
           }),
         );
 
-        // Filter nulls
         const activeTasks = loadedTasks.filter((t): t is Task => t !== null);
         setTasks(activeTasks);
       } catch (e) {
@@ -158,128 +125,190 @@ export default function MyVotesPage() {
       router.push(`/execute-ruling/${task.id}`);
   };
 
-  const handleDetails = (id: string) => {
-    router.push(`/disputes/${id}`);
-  };
-
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 font-manrope pb-32">
-      {/* Header */}
-      <div className="pt-12 px-6 pb-4 bg-white shadow-sm z-10 sticky top-0">
-        <div className="flex items-start gap-4">
-          <button
-            onClick={() => router.back()}
-            className="w-10 h-10 mt-1 rounded-xl bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors shrink-0 shadow-sm border border-gray-100"
-          >
-            <ArrowLeft className="w-5 h-5 text-[#1b1c23]" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-extrabold text-[#1b1c23]">Inbox</h1>
-            <p className="text-sm text-gray-500 font-medium mt-1">
-              {tasks.length} pending actions require your attention.
-            </p>
+    <div className="flex flex-col min-h-screen bg-[#F8F9FC] font-manrope pb-32 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#8c8fff]/5 rounded-full blur-[100px] pointer-events-none" />
+
+      {/* --- Sticky Header --- */}
+      <div className="pt-10 px-6 pb-6 bg-[#F8F9FC]/90 backdrop-blur-md z-20 sticky top-0 border-b border-gray-100/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-[#1b1c23]"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-black text-[#1b1c23] tracking-tight">
+                Your Missions
+              </h1>
+            </div>
           </div>
+          {/* JUSTICE PURPLE: Pending Badge */}
+          {tasks.length > 0 && (
+            <div className="bg-[#8c8fff] text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg shadow-[#8c8fff]/30">
+              {tasks.length} Pending
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="p-5 flex flex-col gap-4 justify-center items-center min-h-[calc(100vh-12rem)]">
+      {/* --- Content Area --- */}
+      <div className="px-5 w-full flex flex-col gap-6 mt-2 relative z-10">
         {!address ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Wallet className="w-10 h-10 text-gray-400" />
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 bg-white rounded-[24px] flex items-center justify-center mb-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+              <Wallet className="w-8 h-8 text-gray-300" />
             </div>
-            <h3 className="font-bold text-[#1b1c23]">Wallet Not Connected</h3>
+            <h3 className="text-lg font-black text-[#1b1c23]">
+              Sync Your Profile
+            </h3>
             <button
               onClick={() => connect()}
-              className="mt-4 px-6 py-3 bg-[#1b1c23] text-white rounded-xl font-bold"
+              className="mt-6 px-8 py-3.5 bg-[#1b1c23] text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-gray-200"
             >
               Connect Wallet
             </button>
           </div>
         ) : isLoading ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            <Loader2 className="w-8 h-8 animate-spin text-[#8c8fff] mb-2" />
-            <p className="text-xs text-gray-400">Syncing inbox...</p>
+          <div className="flex flex-col items-center justify-center py-32 space-y-4">
+            <Loader2 className="w-10 h-10 animate-spin text-[#8c8fff]" />
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest animate-pulse">
+              Fetching Disputes...
+            </p>
           </div>
         ) : tasks.length === 0 ? (
-          /* INBOX ZERO STATE */
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6 animate-in fade-in zoom-in-95">
-            <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4 border border-indigo-100">
-              <CheckCircle2 className="w-12 h-12 text-indigo-500" />
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-28 h-28 bg-gradient-to-tr from-white to-[#F0F2F5] rounded-full flex items-center justify-center mb-6 border-[6px] border-[#F8F9FC] shadow-xl">
+              <CheckCircle2 className="w-12 h-12 text-[#8c8fff]" />
             </div>
-            <h3 className="text-xl font-extrabold text-[#1b1c23]">
-              You're all caught up!
+            <h3 className="text-2xl font-black text-[#1b1c23] tracking-tight">
+              All Clear!
             </h3>
-            <p className="text-sm text-gray-500 mt-2 max-w-[200px] mx-auto">
-              No pending votes or reveals. Check your portfolio for history.
+            <p className="text-base text-gray-500 mt-2 max-w-[240px] mx-auto font-medium">
+              Great job. You have no pending actions at the moment.
             </p>
             <button
               onClick={() => router.push("/disputes")}
-              className="mt-6 px-6 py-3 bg-white border border-gray-200 text-[#1b1c23] rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm"
+              className="mt-8 px-6 py-3.5 bg-white border border-gray-100 text-[#1b1c23] rounded-2xl font-bold text-sm hover:bg-gray-50 transition-all shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]"
             >
-              View Portfolio
+              Browse Active Cases
             </button>
           </div>
         ) : (
-          /* TASK LIST */
-          <div className="flex flex-col gap-3">
-            {tasks.map((task) => (
+          /* --- CARDS LIST --- */
+          <div className="flex flex-col gap-5 pb-10">
+            {tasks.map((task, index) => (
               <div
                 key={task.id}
-                className="bg-white p-5 rounded-[20px] shadow-sm border border-gray-100 flex flex-col gap-4"
+                onClick={() => handleAction(task)}
+                className="group relative bg-white rounded-[28px] p-1 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_35px_-5px_rgba(140,143,255,0.15)] transition-all duration-300 cursor-pointer active:scale-[0.98] animate-in slide-in-from-bottom-4 fade-in fill-mode-forwards"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl ${task.bgColor} flex items-center justify-center shrink-0`}
-                    >
-                      {task.icon}
-                    </div>
+                {/* Status Strip: VOTE is now Purple */}
+                <div
+                  className={`absolute left-0 top-8 bottom-8 w-1.5 rounded-r-full ${
+                    task.phase === "VOTE"
+                      ? "bg-[#8c8fff]" // Purple for Justice
+                      : task.phase === "REVEAL"
+                        ? "bg-[#1b1c23]"
+                        : "bg-emerald-500"
+                  }`}
+                />
+
+                <div className="pl-6 pr-5 py-5 flex flex-col gap-4">
+                  {/* Top Row: Meta + Urgent Badge */}
+                  <div className="flex justify-between items-start">
+                    {/* JUSTICE PURPLE: Category Badge */}
+                    <span className="text-[10px] font-black text-[#8c8fff] uppercase tracking-widest bg-[#8c8fff]/10 px-2 py-1 rounded-md">
+                      {task.category}
+                    </span>
+                    {task.isUrgent && (
+                      <span className="flex items-center gap-1 text-[10px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded-full animate-pulse">
+                        <ShieldAlert className="w-3 h-3" />
+                        Urgent
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Middle: Title & Context */}
+                  <div className="flex justify-between items-center gap-4">
                     <div>
-                      <h4 className="font-extrabold text-[#1b1c23] leading-tight">
+                      <h4 className="font-extrabold text-lg text-[#1b1c23] leading-tight line-clamp-2">
                         {task.title}
                       </h4>
-                      <span className="text-xs font-bold text-gray-400">
-                        {task.category}
-                      </span>
+                      <div className="mt-1.5 flex items-center gap-2 text-xs font-bold text-gray-400">
+                        <span className="font-mono text-gray-300">
+                          #{task.id}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          {/* JUSTICE PURPLE: Stake Icon */}
+                          <Coins className="w-3.5 h-3.5 text-[#8c8fff]" />
+                          {task.stake} USDC Stake
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wide ${task.bgColor} ${task.statusColor}`}
-                  >
-                    {task.phase === "WITHDRAW" ? "CLAIM" : task.phase} NOW
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                  <div
-                    className={`flex items-center gap-1.5 text-xs font-bold ${task.phase === "WITHDRAW" ? "text-indigo-600" : "text-red-500"}`}
-                  >
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    {task.deadlineLabel}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleDetails(task.id)}
-                      className="p-2 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-[#1b1c23] transition-colors"
-                      title="View Details"
-                    >
-                      <FileText className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleAction(task)}
-                      className={`px-5 py-2 rounded-xl text-xs font-extrabold text-white shadow-md transition-all hover:scale-105 active:scale-95 ${task.phase === "REVEAL"
-                        ? "bg-[#8c8fff]"
-                        : task.phase === "WITHDRAW"
-                          ? "bg-[#1b1c23]" // Use primary black for money/withdraw
-                          : "bg-[#1b1c23]"
+                  {/* JUSTICE PURPLE: Gradient Divider */}
+                  <div className="h-px w-full bg-gradient-to-r from-transparent via-[#8c8fff]/20 to-transparent" />
+
+                  {/* Bottom Row: The Action Bar */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`p-2 rounded-xl ${
+                          task.phase === "VOTE"
+                            ? "bg-[#8c8fff]/10 text-[#8c8fff]" // Purple for Vote
+                            : task.phase === "REVEAL"
+                              ? "bg-gray-100 text-gray-600"
+                              : "bg-emerald-50 text-emerald-600"
                         }`}
+                      >
+                        {task.phase === "VOTE" ? (
+                          <Gavel className="w-4 h-4" />
+                        ) : task.phase === "REVEAL" ? (
+                          <Eye className="w-4 h-4" />
+                        ) : (
+                          <Zap className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                          Deadline
+                        </span>
+                        <span
+                          className={`text-xs font-black ${
+                            task.isUrgent ? "text-rose-500" : "text-[#1b1c23]"
+                          }`}
+                        >
+                          {task.deadlineLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      className={`
+                        pl-5 pr-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-md flex items-center gap-2 transition-all duration-300
+                        ${
+                          task.phase === "VOTE"
+                            ? "bg-[#1b1c23] hover:bg-[#32363f]" // Vote button stays black for contrast
+                            : task.phase === "REVEAL"
+                              ? "bg-[#8c8fff] hover:bg-[#7a7de0] shadow-[#8c8fff]/20"
+                              : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20"
+                        }
+                      `}
                     >
                       {task.phase === "REVEAL"
-                        ? "Reveal"
+                        ? "Reveal Vote"
                         : task.phase === "WITHDRAW"
-                          ? "Withdraw"
-                          : "Vote"}
+                          ? "Claim Rewards"
+                          : "Cast Vote"}
+                      <ArrowRight className="w-3.5 h-3.5 opacity-70 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </div>

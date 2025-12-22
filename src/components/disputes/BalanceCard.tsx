@@ -86,7 +86,7 @@ export const BalanceCard: React.FC = () => {
             )}
           </div>
           <button className="bg-[#8c8fff] text-[#1b1c23] border-none rounded-[12.5px] px-[18px] py-[9px] h-7 flex items-center justify-center font-manrope font-extrabold text-xs tracking-[-0.36px] cursor-pointer hover:opacity-90 whitespace-nowrap shrink-0 mt-0 transition-opacity">
-            Billing Profile
+            Details
           </button>
         </div>
 
