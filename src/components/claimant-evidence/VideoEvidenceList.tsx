@@ -15,7 +15,9 @@ interface VideoEvidenceListProps {
   evidenceList: Evidence[];
 }
 
-export const VideoEvidenceList: React.FC<VideoEvidenceListProps> = ({ evidenceList }) => {
+export const VideoEvidenceList: React.FC<VideoEvidenceListProps> = ({
+  evidenceList,
+}) => {
   return (
     <div className="mt-5 flex flex-col gap-3">
       <div className="mx-[19px] flex flex-col gap-3">

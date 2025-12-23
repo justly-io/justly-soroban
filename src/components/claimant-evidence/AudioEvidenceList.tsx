@@ -1,7 +1,6 @@
 import React from "react";
 import { AudioEvidenceCard } from "./AudioEvidenceCard";
 import { MicrophoneIcon } from "./icons/EvidenceIcons";
-import styles from "./EvidenceList.module.css";
 
 interface AudioEvidence {
   id: string;
@@ -14,11 +13,13 @@ interface AudioEvidenceListProps {
   audio: AudioEvidence;
 }
 
-export const AudioEvidenceList: React.FC<AudioEvidenceListProps> = ({ audio }) => {
+export const AudioEvidenceList: React.FC<AudioEvidenceListProps> = ({
+  audio,
+}) => {
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <span className={styles.filterBadge}>
+    <div className="mt-5 flex flex-col gap-3">
+      <div className="mx-[19px] flex flex-col gap-3">
+        <span className="inline-flex items-center gap-1 bg-[rgba(140,143,255,0.2)] text-[#1b1c23] px-2 py-1 rounded-[11.5px] font-manrope font-extrabold text-[10px] tracking-[-0.2px] w-fit h-[23px]">
           <MicrophoneIcon size={10} color="#1b1c23" />
           Audio
         </span>
@@ -27,4 +28,3 @@ export const AudioEvidenceList: React.FC<AudioEvidenceListProps> = ({ audio }) =
     </div>
   );
 };
-

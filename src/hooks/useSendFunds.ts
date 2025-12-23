@@ -143,7 +143,7 @@ export function useSendFunds(onSuccess?: () => void) {
 
         // 5. ATTEMPT SIGNING (The Moment of Truth)
         console.log("🚀 Sending Transaction...");
-        
+
         const tx = await signer.sendTransaction(populatedTx);
 
         console.log("✅ Transaction Sent! Hash:", tx.hash);

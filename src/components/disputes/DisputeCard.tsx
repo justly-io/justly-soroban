@@ -1,8 +1,4 @@
-"use client";
-
-import React from "react";
 import { useRouter } from "next/navigation";
-import type { Dispute } from "./DisputesList";
 import { CrowdfundingIcon, PersonIcon } from "./icons/BadgeIcons";
 import { StarIcon } from "./icons/BadgeIcons";
 import {
@@ -12,10 +8,7 @@ import {
   FileText,
   ArrowRight,
 } from "lucide-react";
-
-interface DisputeCardProps {
-  dispute: Dispute;
-}
+import type { Dispute } from "@/hooks/useDisputeList";
 
 const getIconByCategory = (category: string) => {
   const cat = (category || "").toLowerCase();
@@ -24,7 +17,19 @@ const getIconByCategory = (category: string) => {
   return "/images/icons/stellar-fund-icon.svg";
 };
 
-export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
+export type DisputeUI = Dispute & {
+  votesCount?: number;
+  totalVotes?: number;
+  prize?: string;
+  icon?: string;
+  voters?: Array<{ isMe: boolean; vote: number }>;
+};
+
+// Define constants for readability
+const VOTE_APPROVE = 1;
+// const VOTE_REJECT = 2;
+
+export const DisputeCard = ({ dispute }: { dispute: DisputeUI }) => {
   const router = useRouter();
 
   const handleReadDispute = (e: React.MouseEvent) => {
@@ -39,8 +44,9 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
 
   const isReadyForWithdrawal = dispute.status === 2;
 
-  // Mock logic to find user's vote (replace with actual data logic if available)
-  const myVote = dispute.voters?.find((v: any) => v.isMe)?.vote;
+  // Mock logic to find user's vote
+  // Ensure we handle the case where voters might be undefined
+  const myVote = dispute.voters?.find((v) => v.isMe)?.vote;
 
   return (
     <div
@@ -49,7 +55,7 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
     >
       {/* 1. Header Section */}
       <div className="flex items-start gap-4">
-        {/* Icon Box: Added purple tint background */}
+        {/* Icon Box */}
         <div className="w-[52px] h-[52px] shrink-0 rounded-2xl bg-[#8c8fff]/10 border border-[#8c8fff]/20 flex items-center justify-center overflow-hidden">
           {dispute.icon ? (
             <img
@@ -73,7 +79,6 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
           </h3>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Category Tag: Purple Icon */}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F5F6F9] border border-gray-100">
               <CrowdfundingIcon size={10} color="#8c8fff" />
               <span className="font-manrope font-bold text-[10px] text-[#1b1c23] uppercase tracking-wide">
@@ -81,7 +86,6 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
               </span>
             </div>
 
-            {/* Votes Tag: Purple Icon */}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F5F6F9] border border-gray-100">
               <PersonIcon size={10} color="#8c8fff" />
               <span className="font-manrope font-bold text-[10px] text-[#1b1c23] tracking-wide">
@@ -94,12 +98,16 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
 
       {/* 2. Vote Status / Context Area */}
       <div className="bg-[#F8F9FC] rounded-xl p-4 flex items-center gap-3 border border-gray-50">
-        {myVote ? (
+        {myVote !== undefined ? ( // Check if myVote exists (is not undefined)
           <>
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${myVote === "approve" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                myVote === VOTE_APPROVE
+                  ? "bg-green-100 text-green-600"
+                  : "bg-red-100 text-red-600"
+              }`}
             >
-              {myVote === "approve" ? (
+              {myVote === VOTE_APPROVE ? (
                 <CheckCircle2 size={16} />
               ) : (
                 <XCircle size={16} />
@@ -110,7 +118,7 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
                 Your vote was:
               </span>
               <span className="text-sm font-bold text-[#1b1c23]">
-                {myVote === "approve"
+                {myVote === VOTE_APPROVE
                   ? "Party A (Claimant)"
                   : "Party B (Defendant)"}
               </span>
@@ -135,7 +143,6 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
 
       {/* 3. Footer Section */}
       <div className="flex items-center justify-between pt-1">
-        {/* Prize Info: Updated to Justice Purple text */}
         <div className="flex items-center gap-1.5">
           <StarIcon size={14} color="#8c8fff" />
           <span className="font-manrope font-bold text-xs text-[#8c8fff]">
@@ -143,7 +150,6 @@ export const DisputeCard: React.FC<DisputeCardProps> = ({ dispute }) => {
           </span>
         </div>
 
-        {/* Action Button: Justice Purple Background */}
         {isReadyForWithdrawal ? (
           <button
             onClick={handleWithdraw}

@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
 import { FullscreenIcon } from "./icons/EvidenceIcons";
-import styles from "./EvidenceCarousel.module.css";
 
 interface EvidenceImage {
   id: string;
@@ -12,7 +11,9 @@ interface EvidenceCarouselProps {
   images: EvidenceImage[];
 }
 
-export const EvidenceCarousel: React.FC<EvidenceCarouselProps> = ({ images }) => {
+export const EvidenceCarousel: React.FC<EvidenceCarouselProps> = ({
+  images,
+}) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleFullscreen = (url: string) => {
@@ -22,8 +23,6 @@ export const EvidenceCarousel: React.FC<EvidenceCarouselProps> = ({ images }) =>
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
-
-    // Ensure smooth scrolling
     container.style.scrollBehavior = "smooth";
   }, []);
 
@@ -32,22 +31,25 @@ export const EvidenceCarousel: React.FC<EvidenceCarouselProps> = ({ images }) =>
   }
 
   return (
-    <div className={styles.carouselContainer}>
+    <div className="mt-5 w-full">
       <div
         ref={scrollContainerRef}
-        className={styles.scrollContainer}
+        className="overflow-x-auto overflow-y-hidden scroll-snap-x scroll-snap-mandatory scroll-pl-[19px] scroll-pr-[19px] touch-pan-x cursor-grab w-full no-scrollbar"
       >
-        <div className={styles.imagesGrid}>
+        <div className="flex gap-4 px-[19px] w-max">
           {images.map((image, index) => (
-            <div key={image.id || index} className={styles.imageCard}>
-              <div className={styles.imageContainer}>
+            <div
+              key={image.id || index}
+              className="shrink-0 snap-start snap-always min-w-[273px] w-[273px] h-[196px] rounded-[18px] overflow-hidden relative bg-[#f5f6f9]"
+            >
+              <div className="relative w-full h-full overflow-hidden">
                 <img
                   src={image.url}
                   alt={image.description || `Evidence ${index + 1}`}
-                  className={styles.image}
+                  className="w-full h-full object-cover block"
                 />
                 <button
-                  className={styles.fullscreenButton}
+                  className="absolute top-3 right-3 w-8 h-8 bg-white/90 border-none rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-white p-0 z-10 active:bg-white/80"
                   onClick={() => handleFullscreen(image.url)}
                   aria-label="View fullscreen"
                 >
@@ -61,4 +63,3 @@ export const EvidenceCarousel: React.FC<EvidenceCarouselProps> = ({ images }) =>
     </div>
   );
 };
-

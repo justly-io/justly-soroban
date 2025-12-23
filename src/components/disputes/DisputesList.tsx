@@ -1,39 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DisputeCard } from "./DisputeCard";
 import { BarChartIcon } from "./icons/Icon";
 import { FilterIcon } from "./icons/BadgeIcons";
-import { useConnect } from "@/providers/ConnectProvider";
-import { useSliceContract } from "@/hooks/useSliceContract";
-import { fetchJSONFromIPFS } from "@/util/ipfs";
 import { Gavel, History, Loader2, X, Check } from "lucide-react";
-
-export interface Dispute {
-  id: string;
-  title: string;
-  icon?: string;
-  category: string;
-  votesCount: number;
-  totalVotes: number;
-  prize: string;
-  status: number;
-  revealDeadline: number;
-  voters: any[];
-}
+import { useDisputeList } from "@/hooks/useDisputeList";
 
 export const DisputesList: React.FC = () => {
   const router = useRouter();
-  const { address } = useConnect();
-  const contract = useSliceContract();
+
+  // --- USE NEW HOOK (Fetching "all" disputes for the list) ---
+  const { disputes, isLoading } = useDisputeList("all");
 
   // --- State ---
   const [activeTab, setActiveTab] = useState<"active" | "history">("active");
-  const [disputes, setDisputes] = useState<Dispute[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // --- Filter State ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -52,70 +34,18 @@ export const DisputesList: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- Fetch Data ---
-  useEffect(() => {
-    const loadDisputes = async () => {
-      if (!contract || !address) return;
-      setIsLoading(true);
-      try {
-        const jurorIds = await contract.getJurorDisputes(address);
-
-        const loaded = await Promise.all(
-          jurorIds.map(async (idBg: bigint) => {
-            const id = idBg.toString();
-            const d = await contract.disputes(id);
-            const category = d.category || "General";
-            let title = `Dispute #${id}`;
-
-            if (d.ipfsHash) {
-              const meta = await fetchJSONFromIPFS(d.ipfsHash);
-              if (meta?.title) title = meta.title;
-              // Optional: if IPFS has better category data, use it
-              // if (meta?.category) category = meta.category;
-            }
-
-            return {
-              id,
-              title,
-              category,
-              votesCount: 0,
-              totalVotes: Number(d.jurorsRequired),
-              prize: "Rewards Pending",
-              status: Number(d.status),
-              revealDeadline: Number(d.revealDeadline),
-              voters: [],
-            };
-          }),
-        );
-
-        setDisputes(loaded.reverse());
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadDisputes();
-  }, [contract, address]);
-
   // --- Derived Data ---
-
-  // 1. Extract unique categories from ALL disputes (not just filtered ones)
   const availableCategories = useMemo(() => {
     const cats = new Set(disputes.map((d) => d.category));
     return Array.from(cats).filter(Boolean);
   }, [disputes]);
 
-  // 2. Apply Filters
   const displayedDisputes = disputes.filter((d) => {
-    // Tab Filter: Status < 3 is Active, Status 3 is History (Executed)
+    // Status < 3 is Active, Status 3 is History (Executed)
     const matchesTab = activeTab === "active" ? d.status < 3 : d.status === 3;
-
-    // Category Filter
     const matchesCategory = selectedCategory
       ? d.category === selectedCategory
       : true;
-
     return matchesTab && matchesCategory;
   });
 
@@ -125,19 +55,21 @@ export const DisputesList: React.FC = () => {
       <div className="flex gap-6 border-b border-gray-100 mb-6">
         <button
           onClick={() => setActiveTab("active")}
-          className={`pb-3 font-semibold transition-all ${activeTab === "active"
+          className={`pb-3 font-semibold transition-all ${
+            activeTab === "active"
               ? "text-[#1b1c23] border-b-2 border-[#1b1c23]"
               : "text-gray-400 hover:text-gray-600"
-            }`}
+          }`}
         >
           Active Cases
         </button>
         <button
           onClick={() => setActiveTab("history")}
-          className={`pb-3 font-semibold transition-all ${activeTab === "history"
+          className={`pb-3 font-semibold transition-all ${
+            activeTab === "history"
               ? "text-[#1b1c23] border-b-2 border-[#1b1c23]"
               : "text-gray-400 hover:text-gray-600"
-            }`}
+          }`}
         >
           Past History
         </button>
@@ -181,14 +113,12 @@ export const DisputesList: React.FC = () => {
             )}
           </button>
 
-          {/* Popup Menu */}
           {isFilterOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-2 origin-top-right">
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50 animate-in fade-in zoom-in-95">
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wider px-3 py-2">
                   By Category
                 </span>
-
                 {availableCategories.length === 0 ? (
                   <div className="px-3 py-2 text-xs text-gray-400 italic">
                     No categories found
@@ -215,20 +145,16 @@ export const DisputesList: React.FC = () => {
                     </button>
                   ))
                 )}
-
                 {selectedCategory && (
-                  <>
-                    <div className="h-px bg-gray-100 my-1" />
-                    <button
-                      onClick={() => {
-                        setSelectedCategory(null);
-                        setIsFilterOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                      Clear Filter
-                    </button>
-                  </>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      setIsFilterOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-colors mt-1 border-t border-gray-100"
+                  >
+                    Clear Filter
+                  </button>
                 )}
               </div>
             </div>
@@ -236,6 +162,7 @@ export const DisputesList: React.FC = () => {
         </div>
       </div>
 
+      {/* --- LIST CONTENT --- */}
       <div className="flex flex-col gap-[25px] mb-10 min-h-[300px]">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16">
@@ -245,8 +172,7 @@ export const DisputesList: React.FC = () => {
             </span>
           </div>
         ) : displayedDisputes.length === 0 ? (
-          /* --- MODERN EMPTY STATE --- */
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center animate-in fade-in zoom-in-95 duration-300">
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center animate-in fade-in zoom-in-95">
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-dashed border-gray-200">
               {activeTab === "active" ? (
                 <Gavel className="w-9 h-9 text-gray-300" />
@@ -254,7 +180,6 @@ export const DisputesList: React.FC = () => {
                 <History className="w-9 h-9 text-gray-300" />
               )}
             </div>
-
             <h3 className="text-[#1b1c23] font-manrope font-extrabold text-base mb-1">
               {selectedCategory
                 ? `No ${selectedCategory} Cases`
@@ -262,15 +187,11 @@ export const DisputesList: React.FC = () => {
                   ? "No Active Cases"
                   : "No History Yet"}
             </h3>
-
-            <p className="text-gray-400 text-xs font-medium max-w-[220px] leading-relaxed mx-auto">
+            <p className="text-gray-400 text-xs font-medium max-w-[220px] mx-auto">
               {selectedCategory
-                ? "Try clearing the filter to see all disputes."
-                : activeTab === "active"
-                  ? "Check 'Inbox' for tasks or find new ones."
-                  : "Past resolved cases will appear here."}
+                ? "Try clearing the filter."
+                : "Check back later for new disputes."}
             </p>
-
             {selectedCategory && (
               <button
                 onClick={() => setSelectedCategory(null)}
@@ -282,7 +203,16 @@ export const DisputesList: React.FC = () => {
           </div>
         ) : (
           displayedDisputes.map((dispute) => (
-            <DisputeCard key={dispute.id} dispute={dispute} />
+            <DisputeCard
+              key={dispute.id}
+              dispute={{
+                ...dispute,
+                votesCount: 0,
+                totalVotes: dispute.jurorsRequired,
+                prize: "Rewards Pending", // Or format prize from stake
+                voters: [],
+              }}
+            />
           ))
         )}
       </div>

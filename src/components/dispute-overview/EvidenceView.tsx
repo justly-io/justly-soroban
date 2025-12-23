@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { DisputeOverviewHeader } from "@/components/dispute-overview/DisputeOverviewHeader";
 import { PaginationDots } from "@/components/dispute-overview/PaginationDots";
 import { useEvidence, EvidenceRole } from "@/hooks/useEvidence";
-import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import {
   Calendar,
   User,
@@ -43,7 +43,7 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
     useEvidence(disputeId, role);
 
   // 2. Swipe Handlers
-  const { handlers } = useSwipeNavigation({
+  const { handlers } = useSwipeGesture({
     onSwipeLeft: () => router.push(nextPath),
     onSwipeRight: () => router.push(prevPath),
   });
