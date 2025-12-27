@@ -1,5 +1,6 @@
 import { createConnector } from 'wagmi';
 import { Chain } from 'wagmi/chains';
+import { defaultChain } from '@/config/chains';
 
 // Helper to convert Wagmi Chains to the Hex Map required by XO
 function getRpcMap(chains: readonly Chain[]) {
@@ -69,8 +70,10 @@ export function xoConnector() {
 
                     const chains = config.chains;
                     // Default to the first chain in your config, or the requested one
-                    const initialChain = chains[0];
+                    const initialChain = defaultChain;
                     const initialHexId = `0x${initialChain.id.toString(16)}`;
+
+                    console.log("[xoConnector] Initializing with Chain:", initialChain.name, initialHexId);
 
 
 
