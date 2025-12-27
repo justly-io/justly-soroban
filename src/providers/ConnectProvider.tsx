@@ -23,7 +23,7 @@ const ConnectContext = createContext<ConnectContextType | null>(null);
 
 export const ConnectProvider = ({ children }: { children: ReactNode }) => {
   const { isEmbedded } = useEmbedded();
-  const { login, logout } = usePrivy();
+  const { login, logout, ready, authenticated } = usePrivy();
   const { connectAsync: wagmiConnect, connectors } = useWagmiConnect();
   const { disconnect: wagmiDisconnect } = useDisconnect();
 
@@ -63,7 +63,11 @@ export const ConnectProvider = ({ children }: { children: ReactNode }) => {
         alert("Configuration Error: Embedded connector missing.");
       }
     } else {
-      login();
+      if (ready && !authenticated) {
+        login();
+      } else if (authenticated) {
+        console.log("User is already logged in via Privy");
+      }
     }
   };
 
