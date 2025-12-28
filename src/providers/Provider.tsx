@@ -10,6 +10,8 @@ import {
 } from "wagmi";
 import { PRIVY_APP_ID, PRIVY_CLIENT_ID } from "@/config/app";
 import { config } from "@/config";
+import { TimerProvider } from "@/providers/TimerContext";
+import { AutoConnect } from "@/components/AutoConnect";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +23,6 @@ export default function ContextProvider({
   cookies?: string | null;
 }) {
   const initialState = cookieToInitialState(config, cookies);
-
   const isEmbedded = process.env.NEXT_PUBLIC_IS_EMBEDDED === "true";
 
   const ActiveWagmiProvider = isEmbedded
@@ -48,7 +49,10 @@ export default function ContextProvider({
     >
       <QueryClientProvider client={queryClient}>
         <ActiveWagmiProvider config={config} initialState={initialState}>
-          {children}
+          <TimerProvider>
+            <AutoConnect />
+            {children}
+          </TimerProvider>
         </ActiveWagmiProvider>
       </QueryClientProvider>
     </PrivyProvider>

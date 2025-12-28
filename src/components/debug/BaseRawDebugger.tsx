@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useConnect } from "@/providers/ConnectProvider";
 import { toast } from "sonner";
 import { Terminal, Play } from "lucide-react";
 import { useWalletClient } from "wagmi";
+import { useSliceConnect } from "@/hooks/useSliceConnect";
 
 export const BaseRawDebugger = () => {
-  const { address } = useConnect();
+  const { address } = useSliceConnect();
   const { data: walletClient } = useWalletClient();
   const [logs, setLogs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +25,7 @@ export const BaseRawDebugger = () => {
     addLog("🚀 Starting Safe Raw Transaction...");
 
     try {
-      // 1. Force Chain Switch 
+      // 1. Force Chain Switch
       try {
         const chainId = await walletClient.getChainId();
         addLog(`Current Chain ID: ${chainId}`);

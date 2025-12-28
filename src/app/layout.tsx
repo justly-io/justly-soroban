@@ -2,15 +2,12 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 import React from "react";
-import ContextProvider from "@/contexts/Provider";
-import { ConnectProvider } from "@/providers/ConnectProvider";
-import { Geist } from "next/font/google"; // Use correct imports if available, otherwise localFont
-import localFont from "next/font/local"; // Import localFont
-import { TimerProvider } from "@/contexts/TimerContext";
+import ContextProvider from "@/providers/Provider";
+import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { ConsoleOverlay } from "@/components/debug/ConsoleOverlay";
 import { DebugToggle } from "@/components/debug/DebugToggle";
-import { AutoConnect } from "@/components/AutoConnect";
 
 export const metadata: Metadata = {
   title: "Slice",
@@ -47,29 +44,12 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center min-h-screen bg-gray-100`}
       >
         <ContextProvider cookies={cookies}>
-          <AutoConnect />
-          <ConnectProvider>
-            <TimerProvider>
-              {/* Updated Structure:
-                  1. relative: allows absolute positioning inside if needed
-                  2. flex flex-col: enables the "sticky footer" layout
-                */}
-              <div className="w-full max-w-[430px] min-h-screen bg-white shadow-2xl relative flex flex-col">
-                {/* Content grows to fill space, pushing nav to bottom */}
-                {/* The pb adds a safe zone at the bottom of every page so content */}
-                <div className="flex-1 flex flex-col pb-[70px]">{children}</div>
-
-                {/* Persistent Bottom Navigation */}
-                <BottomNavigation />
-
-                {/* Debug Overlay */}
-                {process.env.NEXT_PUBLIC_IS_EMBEDDED === "true" && (
-                  <ConsoleOverlay />
-                )}
-                <DebugToggle />
-              </div>
-            </TimerProvider>
-          </ConnectProvider>
+          <div className="w-full max-w-[430px] min-h-screen bg-white shadow-2xl relative flex flex-col">
+            <div className="flex-1 flex flex-col pb-[70px]">{children}</div>
+            <BottomNavigation />
+            <ConsoleOverlay />
+            <DebugToggle />
+          </div>
         </ContextProvider>
       </body>
     </html>

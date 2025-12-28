@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useConnect } from "@/providers/ConnectProvider";
 import { toast } from "sonner";
 import { Terminal, Send, Zap } from "lucide-react";
 import { useWalletClient } from "wagmi";
+import { useSliceConnect } from "@/hooks/useSliceConnect";
 
 export const MinimalDebugger = () => {
-  const { address } = useConnect();
+  const { address } = useSliceConnect();
   const { data: walletClient } = useWalletClient();
   const [logs, setLogs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,11 +45,12 @@ export const MinimalDebugger = () => {
       // 1. Force Chain Switch (Just in case)
       try {
         const chainId = await walletClient.getChainId();
-        if (chainId !== 8453) { // 0x2105
+        if (chainId !== 8453) {
+          // 0x2105
           addLog("⚠️ Wrong Chain. Switching...");
           await walletClient.switchChain({ id: 8453 });
         }
-      } catch (_e) { }
+      } catch (_e) {}
 
       // 2. Add 'from' address
       const fullPayload = {

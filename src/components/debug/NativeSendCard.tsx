@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { parseEther } from "viem";
 import { toast } from "sonner";
-import { useConnect } from "@/providers/ConnectProvider";
 import { useSendTransaction } from "wagmi";
 import { Send, Loader2, AlertTriangle } from "lucide-react";
+import { useSliceConnect } from "@/hooks/useSliceConnect";
 
 export const NativeSendCard = () => {
-  const { address } = useConnect();
+  const { address } = useSliceConnect();
   const { sendTransactionAsync } = useSendTransaction();
 
   const [status, setStatus] = useState<
@@ -57,12 +57,11 @@ export const NativeSendCard = () => {
       toast.success("Native Transaction Sent!");
       setStatus("success");
 
-      // Note: We are not waiting for confirmation here to keep it simple/raw, 
+      // Note: We are not waiting for confirmation here to keep it simple/raw,
       // or we could use usePublicClient().waitForTransactionReceipt(hash) if we wanted.
       // Ethers code waited. Let's just log "Sent" as 'native send' usually implies fire-and-forget or just testing connectivity.
-      // If we want to wait, we'd need publicClient. 
+      // If we want to wait, we'd need publicClient.
       // I'll leave it as sent to match "Raw" feel, or just say "Sent".
-
     } catch (err: any) {
       console.error("Native Send Error", err);
       setStatus("error");

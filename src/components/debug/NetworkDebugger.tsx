@@ -1,13 +1,13 @@
 "use client";
 
 import { useAccount } from "wagmi";
-import { useConnect } from "@/providers/ConnectProvider";
 import { defaultChain } from "@/config/chains";
 import { useEmbedded } from "@/hooks/useEmbedded";
+import { useSliceConnect } from "@/hooks/useSliceConnect";
 
 export const NetworkDebugger = () => {
   const { chain } = useAccount();
-  const { address } = useConnect();
+  const { address } = useSliceConnect();
   const { isEmbedded } = useEmbedded(); // Get embedded state
 
   // Logic: If embedded, we rely on the Default Chain (XO enforces this).

@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useConnect } from "@/providers/ConnectProvider";
 import { toast } from "sonner";
 import { Zap, CheckCircle2 } from "lucide-react";
 import { useWalletClient } from "wagmi";
+import { useSliceConnect } from "@/hooks/useSliceConnect";
 
 export const SmartDebugger = () => {
-  const { address } = useConnect();
+  const { address } = useSliceConnect();
   const { data: walletClient } = useWalletClient();
   const [logs, setLogs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
