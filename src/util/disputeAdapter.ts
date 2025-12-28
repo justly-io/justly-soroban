@@ -1,23 +1,28 @@
 import { formatUnits } from "viem";
 import { fetchJSONFromIPFS } from "@/util/ipfs";
 
-// Define the unified UI model here
 export interface DisputeUI {
   id: string;
   title: string;
   category: string;
-  status: number; // 0=Created, 1=Vote, 2=Reveal, 3=Executed
+  status: number;
   phase: "VOTE" | "REVEAL" | "WITHDRAW" | "CLOSED";
   deadlineLabel: string;
   isUrgent: boolean;
   stake: string;
   jurorsRequired: number;
   revealDeadline: number;
-  description?: string;
-  evidence?: any[];
+  description: string;
+  evidence: string[];
   claimer: string;
   defender: string;
   winner?: string;
+
+  // NEW: Real Data Fields
+  claimerName?: string;
+  defenderName?: string;
+  audioEvidence?: string;
+  carouselEvidence?: string[];
 }
 
 export async function transformDisputeData(
@@ -27,13 +32,18 @@ export async function transformDisputeData(
   const status = Number(contractData.status);
   const now = Math.floor(Date.now() / 1000);
 
-  // Default Metadata
+  // Defaults
   let title = `Dispute #${id}`;
-  let description = "No description available.";
+  let description = "No description provided.";
   let category = contractData.category || "General";
-  let evidence = [];
+  let evidence: string[] = [];
 
-  // IPFS Fetch
+  // Containers for metadata
+  let audioEvidence: string | undefined = undefined;
+  let carouselEvidence: string[] = [];
+  let aliases = { claimer: null, defender: null };
+
+  // Fetch IPFS Metadata
   if (contractData.ipfsHash) {
     const meta = await fetchJSONFromIPFS(contractData.ipfsHash);
     if (meta) {
@@ -41,6 +51,11 @@ export async function transformDisputeData(
       description = meta.description || description;
       if (meta.category) category = meta.category;
       evidence = meta.evidence || [];
+
+      // Capture extra fields
+      audioEvidence = meta.audioEvidence || undefined;
+      carouselEvidence = meta.carouselEvidence || [];
+      if (meta.aliases) aliases = meta.aliases;
     }
   }
 
@@ -52,8 +67,6 @@ export async function transformDisputeData(
     phase = "VOTE";
     deadline = Number(contractData.commitDeadline);
   } else if (status === 2) {
-    // If user has local secret but hasn't revealed on-chain, they need to REVEAL
-    // Otherwise, check if reveal deadline passed for WITHDRAW
     phase = "REVEAL";
     deadline = Number(contractData.revealDeadline);
     if (now > deadline) phase = "WITHDRAW";
@@ -86,5 +99,11 @@ export async function transformDisputeData(
     claimer: contractData.claimer,
     defender: contractData.defender,
     winner: contractData.winner,
+
+    // Map new fields using the aliases found in IPFS
+    claimerName: aliases.claimer || contractData.claimer,
+    defenderName: aliases.defender || contractData.defender,
+    audioEvidence,
+    carouselEvidence,
   };
 }

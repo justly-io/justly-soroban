@@ -5,6 +5,7 @@ interface AudioEvidence {
   id: string;
   title: string;
   duration: string;
+  url?: string;
   progress?: number; // 0-100
 }
 
@@ -17,8 +18,17 @@ export const AudioEvidenceCard: React.FC<AudioEvidenceCardProps> = ({
 }) => {
   const [progress] = useState(audio.progress || 0);
 
+  const handleClick = () => {
+    if (audio.url) {
+      window.open(audio.url, "_blank");
+    }
+  };
+
   return (
-    <div className="bg-[rgba(140,143,255,0.1)] rounded-[16px] p-4 mx-[19px] flex items-center gap-4 box-border">
+    <div
+      onClick={handleClick}
+      className="bg-[rgba(140,143,255,0.1)] rounded-[16px] p-4 mx-[19px] flex items-center gap-4 box-border cursor-pointer hover:bg-[rgba(140,143,255,0.2)] transition-colors"
+    >
       <div className="shrink-0">
         <MicrophoneIcon size={35} color="#1b1c23" />
       </div>

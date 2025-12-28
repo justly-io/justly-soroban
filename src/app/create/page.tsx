@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useCreateDispute } from "@/hooks/useCreateDispute";
+import { uploadFileToIPFS } from "@/util/ipfs";
 import {
   Loader2,
   UploadCloud,
@@ -22,11 +23,24 @@ export default function CreateDisputePage() {
 
   // Form State
   const [title, setTitle] = useState("");
+  const [claimerName, setClaimerName] = useState("");
+  const [defenderName, setDefenderName] = useState("");
   const [category, setCategory] = useState("General");
   const [description, setDescription] = useState("");
   const [defenderAddress, setDefenderAddress] = useState("");
   const [evidenceLink, setEvidenceLink] = useState("");
   const [jurorsRequired, setJurorsRequired] = useState(3);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [carouselFiles, setCarouselFiles] = useState<File[]>([]);
+
+  // Handlers
+  const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) setAudioFile(e.target.files[0]);
+  };
+
+  const handleCarouselChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setCarouselFiles(Array.from(e.target.files));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,11 +55,35 @@ export default function CreateDisputePage() {
       return;
     }
 
+    // 1. Upload Assets First
+    let audioUrl = "";
+    let carouselUrls: string[] = [];
+
+    if (audioFile) {
+      const hash = await uploadFileToIPFS(audioFile);
+      if (hash) audioUrl = `https://gateway.pinata.cloud/ipfs/${hash}`;
+    }
+
+    if (carouselFiles.length > 0) {
+      // Upload all images in parallel
+      const uploadPromises = carouselFiles.map((f) => uploadFileToIPFS(f));
+      const hashes = await Promise.all(uploadPromises);
+      carouselUrls = hashes
+        .filter((h) => h)
+        .map((h) => `https://gateway.pinata.cloud/ipfs/${h}`);
+    }
+
     const disputeData = {
       title,
       description,
       category,
       evidence: evidenceLink ? [evidenceLink] : [],
+      audioEvidence: audioUrl || null,
+      carouselEvidence: carouselUrls,
+      aliases: {
+        claimer: claimerName || "Anonymous Claimant",
+        defender: defenderName || "Anonymous Defendant",
+      },
       created_at: new Date().toISOString(),
     };
 
@@ -96,6 +134,33 @@ export default function CreateDisputePage() {
               onChange={(e) => setTitle(e.target.value)}
               disabled={isCreating}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-[#1b1c23]">
+                Your Name (Alias)
+              </label>
+              <input
+                className="p-3 bg-[#f5f6f9] rounded-xl text-sm outline-none border border-transparent focus:ring-2 focus:ring-[#8c8fff]"
+                value={claimerName}
+                onChange={(e) => setClaimerName(e.target.value)}
+                placeholder="e.g. John Doe"
+                disabled={isCreating}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold text-[#1b1c23]">
+                Opponent Name
+              </label>
+              <input
+                className="p-3 bg-[#f5f6f9] rounded-xl text-sm outline-none border border-transparent focus:ring-2 focus:ring-[#8c8fff]"
+                value={defenderName}
+                onChange={(e) => setDefenderName(e.target.value)}
+                placeholder="e.g. Jane Smith"
+                disabled={isCreating}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -178,6 +243,33 @@ export default function CreateDisputePage() {
                 disabled={isCreating}
               />
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold text-[#1b1c23]">
+              Voice Statement (Optional)
+            </label>
+            <input
+              type="file"
+              accept="audio/*"
+              onChange={handleAudioChange}
+              disabled={isCreating}
+              className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#f5f6f9] file:text-[#1b1c23] hover:file:bg-gray-200"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold text-[#1b1c23]">
+              Additional Photos (Carousel)
+            </label>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleCarouselChange}
+              disabled={isCreating}
+              className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#f5f6f9] file:text-[#1b1c23] hover:file:bg-gray-200"
+            />
           </div>
 
           <div className="mt-4">

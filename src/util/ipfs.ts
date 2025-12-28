@@ -53,6 +53,44 @@ export const uploadJSONToIPFS = async (content: any) => {
 };
 
 /**
+ * Uploads a File object to IPFS via Pinata.
+ * @param file - The File object to upload.
+ * @returns The IPFS Hash (CID) of the pinned file, or null if failed.
+ */
+export const uploadFileToIPFS = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const metadata = JSON.stringify({
+      name: file.name,
+    });
+    formData.append("pinataMetadata", metadata);
+
+    const options = JSON.stringify({
+      cidVersion: 0,
+    });
+    formData.append("pinataOptions", options);
+
+    const res = await axios.post(
+      "https://api.pinata.cloud/pinning/pinFileToIPFS",
+      formData,
+      {
+        maxBodyLength: Infinity,
+        headers: {
+          // axios automatically sets the multipart boundary
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
+        },
+      },
+    );
+    return res.data.IpfsHash;
+  } catch (error) {
+    console.error("Error uploading file to IPFS:", error);
+    return null;
+  }
+};
+
+/**
  * Fetches JSON data from IPFS using the configured Gateway.
  * * @param ipfsHash - The CID of the content to fetch.
  * @returns The parsed JSON data, or null if failed.

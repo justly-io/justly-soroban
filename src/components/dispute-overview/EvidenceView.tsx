@@ -160,7 +160,10 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
             <div className="flex flex-col gap-3">
               {/* Audio Evidence */}
               {audioEvidence && (
-                <div className="bg-[#1b1c23] rounded-[20px] p-4 flex items-center gap-4 shadow-lg shadow-gray-200 text-white relative overflow-hidden group cursor-pointer transition-transform hover:scale-[1.01]">
+                <div
+                  onClick={() => openMedia(audioEvidence.url!)}
+                  className="bg-[#1b1c23] rounded-[20px] p-4 flex items-center gap-4 shadow-lg shadow-gray-200 text-white relative overflow-hidden group cursor-pointer transition-transform hover:scale-[1.01]"
+                >
                   <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white/5 to-transparent pointer-events-none" />
 
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0 backdrop-blur-md border border-white/10">

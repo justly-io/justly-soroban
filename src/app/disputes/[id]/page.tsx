@@ -6,6 +6,7 @@ import { DisputeOverviewHeader } from "@/components/dispute-overview/DisputeOver
 import { PaginationDots } from "@/components/dispute-overview/PaginationDots";
 import { useGetDispute } from "@/hooks/useGetDispute";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import { shortenAddress } from "@/util/wallet";
 import {
   Loader2,
   Clock,
@@ -46,22 +47,25 @@ export default function DisputeOverviewPage() {
           ["Created", "Commit", "Reveal", "Executed"][dispute.status] ||
           "Unknown",
         claimer: {
-          name: dispute.claimer,
-          shortName: `${dispute.claimer.slice(0, 6)}...${dispute.claimer.slice(-4)}`,
-          avatar: "/images/profiles-mockup/profile-1.jpg", // Using real avatar
+          name: dispute.claimerName || dispute.claimer,
+          // FIX: Pass the final string to shortenAddress.
+          // It will detect if it's an address and shorten it, or leave it alone if it's a real name.
+          shortName: shortenAddress(dispute.claimerName || dispute.claimer),
+          avatar: "/images/profiles-mockup/profile-1.jpg",
           isWinner:
             isFinished && winnerAddress === dispute.claimer.toLowerCase(),
         },
         defender: {
-          name: dispute.defender,
-          shortName: `${dispute.defender.slice(0, 6)}...${dispute.defender.slice(-4)}`,
-          avatar: "/images/profiles-mockup/profile-2.jpg", // Using real avatar
+          name: dispute.defenderName || dispute.defender,
+          // FIX: Same here for defender
+          shortName: shortenAddress(dispute.defenderName || dispute.defender),
+          avatar: "/images/profiles-mockup/profile-2.jpg",
           isWinner:
             isFinished && winnerAddress === dispute.defender.toLowerCase(),
         },
         description: dispute.description || "No description provided.",
-        deadlineLabel: dispute.deadlineLabel, // Changed from deadline to deadlineLabel
-        stake: dispute.stake, // Already formatted in adapter
+        deadlineLabel: dispute.deadlineLabel,
+        stake: dispute.stake,
       }
     : null;
 
@@ -130,9 +134,12 @@ export default function DisputeOverviewPage() {
                   <span className="block text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">
                     Claimer
                   </span>
-                  <span className="text-base font-bold text-[#1b1c23] bg-white px-3 py-1 rounded-lg border border-gray-100 shadow-sm">
-                    {displayDispute.claimer.shortName}
-                  </span>
+                  {/* Added max-w and truncate to prevent overflow */}
+                  <div className="max-w-[100px] sm:max-w-none mx-auto">
+                    <span className="inline-block text-base font-bold text-[#1b1c23] bg-white px-3 py-1 rounded-lg border border-gray-100 shadow-sm truncate w-full">
+                      {displayDispute.claimer.shortName}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -159,9 +166,12 @@ export default function DisputeOverviewPage() {
                   <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
                     Defender
                   </span>
-                  <span className="text-base font-bold text-[#1b1c23] bg-white px-3 py-1 rounded-lg border border-gray-100 shadow-sm">
-                    {displayDispute.defender.shortName}
-                  </span>
+                  {/* Added max-w and truncate to prevent overflow */}
+                  <div className="max-w-[100px] sm:max-w-none mx-auto">
+                    <span className="inline-block text-base font-bold text-[#1b1c23] bg-white px-3 py-1 rounded-lg border border-gray-100 shadow-sm truncate w-full">
+                      {displayDispute.defender.shortName}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -179,7 +189,6 @@ export default function DisputeOverviewPage() {
           <div className="bg-white rounded-[24px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-gray-100 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#8c8fff]/20 to-transparent" />
 
-            {/* Increased text size to 'text-base' for better readability and color depth */}
             <p className="text-base text-gray-600 leading-relaxed font-medium">
               {displayDispute.description}
             </p>
@@ -193,7 +202,6 @@ export default function DisputeOverviewPage() {
                   <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">
                     Juror Stake
                   </span>
-                  {/* Larger stake text */}
                   <span className="text-base font-black text-[#1b1c23]">
                     {displayDispute.stake} USDC
                   </span>

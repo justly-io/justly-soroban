@@ -6,70 +6,55 @@ export function useEvidence(disputeId: string, role: EvidenceRole) {
   const { dispute } = useGetDispute(disputeId);
   const isClaimant = role === "claimant";
 
-  // 1. Party Details
-  // Note: In a real app, you'd map 'claimer'/'defender' from the contract to these fields
+  // 1. Dynamic Party Info
+  // Select the correct name based on the role
+  const realName = isClaimant
+    ? dispute?.claimerName || dispute?.claimer
+    : dispute?.defenderName || dispute?.defender;
+
   const partyInfo = {
-    name: isClaimant
-      ? dispute?.claimer || "Julio Banegas"
-      : dispute?.defender || "Micaela Descotte",
-    role: isClaimant ? "Claimant" : "Defendant",
+    name: realName || "Loading...",
+    // Use the specific profile images requested
     avatar: isClaimant
       ? "/images/profiles-mockup/profile-1.jpg"
-      : "/images/profiles-mockup/profile-2.jpg", // Mock or dynamic
+      : "/images/profiles-mockup/profile-2.jpg",
+    role: isClaimant ? "Claimant" : "Defendant",
   };
 
-  // 2. Statement / Demand
+  // 2. Statement Logic
+  // Claimant gets the Description. Defendant gets a placeholder.
   const statement = isClaimant
-    ? "I was hired to develop a React Native mobile application. The agreed milestone was a functional MVP delivered by October 1st..."
-    : "The deliverables provided were incomplete and buggy. The 'MVP' crashed on launch."; // Mock data
+    ? dispute?.description || "No statement provided."
+    : "The defendant has not submitted a counter-statement on-chain.";
 
-  // 3. Evidence Processing
-  // In a real scenario, you filter dispute.evidence by submitter.
-  // Here we just use the raw list for demonstration.
-  const rawEvidence = dispute?.evidence || [];
+  // 3. Evidence Routing
+  // ONLY show evidence if the role is Claimant.
+  const showEvidence = isClaimant;
 
-  const imageEvidence = rawEvidence
-    .filter((url: string) => !url.endsWith(".mp4"))
-    .map((url: string, i: number) => ({
-      id: `img-${i}`,
-      type: "image" as const,
-      url,
-      description: "Evidence submitted",
-      uploadDate: "Recently",
-    }));
+  const rawCarousel = showEvidence ? dispute?.carouselEvidence || [] : [];
+  const rawAudio = showEvidence ? dispute?.audioEvidence : null;
 
-  const videoEvidence = rawEvidence
-    .filter((url: string) => url.endsWith(".mp4"))
-    .map((url: string, i: number) => ({
-      id: `vid-${i}`,
-      type: "video" as const,
-      url,
-      thumbnail: "/images/category-amount/evidencia-video.png",
-      description: "Video Evidence",
-      uploadDate: "Recently",
-    }));
+  // Process Images
+  const imageEvidence = rawCarousel.map((url: string, i: number) => ({
+    id: `img-${i}`,
+    type: "image" as const,
+    url,
+    description: `Exhibit ${i + 1}`,
+    uploadDate: "Attached to dispute",
+  }));
 
-  // Mock Audio (could be null if none)
-  const audioEvidence = {
-    id: "audio-1",
-    title: `${partyInfo.role}'s Audio Statement`,
-    duration: "1:45min",
-    progress: 0,
-  };
+  // Process Audio
+  const audioEvidence = rawAudio
+    ? {
+        id: "audio-main",
+        title: `${partyInfo.role}'s Statement`,
+        duration: "Play Audio",
+        url: rawAudio,
+      }
+    : null;
 
-  // Mock Carousel Images
-  const carouselImages = [
-    {
-      id: "c1",
-      url: "/images/category-amount/evidencia-1.png",
-      description: "Exhibit A",
-    },
-    {
-      id: "c2",
-      url: "/images/category-amount/evidencia-2.png",
-      description: "Exhibit B",
-    },
-  ];
+  // Video placeholder (empty for now unless you add video uploads)
+  const videoEvidence: any[] = [];
 
   return {
     dispute,
@@ -78,6 +63,5 @@ export function useEvidence(disputeId: string, role: EvidenceRole) {
     imageEvidence,
     videoEvidence,
     audioEvidence,
-    carouselImages,
   };
 }
