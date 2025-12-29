@@ -1,26 +1,52 @@
 import React, { useState } from "react";
-import { Hash } from "lucide-react";
+import { Hash, KeyRound, Calculator } from "lucide-react";
 import { toast } from "sonner";
-import { calculateCommitment, generateSalt } from "@/util/votingUtils";
+import { useSignMessage } from "wagmi";
+import {
+  calculateCommitment,
+  deriveSaltFromSignature,
+  getSaltGenerationMessage,
+} from "@/util/votingUtils";
 
 export const CryptoToolsCard = () => {
+  const { signMessageAsync } = useSignMessage();
+
+  const [disputeId, setDisputeId] = useState("1");
   const [toolSalt, setToolSalt] = useState("");
   const [toolHash, setToolHash] = useState("");
-  const toolVote = 1; // Default for tool
+  const [isSigning, setIsSigning] = useState(false);
 
+  const toolVote = 1; // Keeping default vote as 1 (Claimant) for testing
+
+  // 1. New Flow: Sign Message -> Derive Salt
+  const handleDeriveSalt = async () => {
+    try {
+      setIsSigning(true);
+      const message = getSaltGenerationMessage(disputeId);
+      const signature = await signMessageAsync({ message });
+      const derivedSalt = deriveSaltFromSignature(signature);
+
+      setToolSalt(derivedSalt.toString());
+      toast.success("Salt derived from wallet signature!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to sign message");
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+  // 2. Calculate Hash (Commitment)
   const handleCalculateHash = () => {
     if (!toolSalt) {
-      const s = generateSalt();
-      setToolSalt(s.toString());
-      const h = calculateCommitment(toolVote, s);
+      toast.error("Please enter or derive a salt first");
+      return;
+    }
+    try {
+      const h = calculateCommitment(toolVote, BigInt(toolSalt));
       setToolHash(h);
-    } else {
-      try {
-        const h = calculateCommitment(toolVote, BigInt(toolSalt));
-        setToolHash(h);
-      } catch (_e) {
-        toast.error("Invalid salt format");
-      }
+    } catch (_e) {
+      toast.error("Invalid salt format");
     }
   };
 
@@ -30,24 +56,64 @@ export const CryptoToolsCard = () => {
         <Hash className="w-4 h-4 text-[#8c8fff]" /> Crypto Tools
       </h3>
 
-      <div className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Salt (Empty to Generate)"
-          value={toolSalt}
-          onChange={(e) => setToolSalt(e.target.value)}
-          className="flex-1 bg-[#f5f6f9] rounded-lg p-2 text-xs font-mono border-transparent border focus:border-[#8c8fff] outline-none transition-colors"
-        />
-        <button
-          onClick={handleCalculateHash}
-          className="px-3 bg-gray-100 rounded-lg text-xs font-bold hover:bg-gray-200 active:scale-95 transition-all"
-        >
-          Calc Hash (Vote=1)
-        </button>
+      {/* Section A: Generate Salt */}
+      <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+          Step 1: Derive Salt
+        </span>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            placeholder="ID"
+            value={disputeId}
+            onChange={(e) => setDisputeId(e.target.value)}
+            className="w-16 bg-white rounded-lg p-2 text-xs font-bold border border-gray-200 outline-none focus:border-[#8c8fff]"
+          />
+          <button
+            onClick={handleDeriveSalt}
+            disabled={isSigning}
+            className="flex-1 bg-[#1b1c23] text-white rounded-lg px-3 py-2 text-xs font-bold hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
+          >
+            {isSigning ? (
+              "Signing..."
+            ) : (
+              <>
+                {" "}
+                <KeyRound className="w-3 h-3" /> Sign & Derive Salt{" "}
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Section B: Calculate Hash */}
+      <div className="flex flex-col gap-2">
+        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-1">
+          Step 2: Calculate Commit
+        </span>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Salt (BigInt)"
+            value={toolSalt}
+            onChange={(e) => setToolSalt(e.target.value)}
+            className="flex-1 bg-[#f5f6f9] rounded-lg p-2 text-xs font-mono border-transparent border focus:border-[#8c8fff] outline-none transition-colors"
+          />
+          <button
+            onClick={handleCalculateHash}
+            className="px-3 bg-gray-100 rounded-lg text-xs font-bold hover:bg-gray-200 active:scale-95 transition-all flex items-center gap-1"
+          >
+            <Calculator className="w-3 h-3" />
+            Calc (Vote=1)
+          </button>
+        </div>
+      </div>
+
       {toolHash && (
-        <div className="p-3 bg-gray-900 rounded-lg text-[9px] font-mono text-white break-all border border-gray-700">
-          <span className="text-gray-500 select-none">Result: </span>
+        <div className="p-3 bg-gray-900 rounded-lg text-[9px] font-mono text-white break-all border border-gray-700 animate-in fade-in">
+          <span className="text-gray-500 select-none block mb-1 font-bold">
+            COMMITMENT HASH:
+          </span>
           {toolHash}
         </div>
       )}

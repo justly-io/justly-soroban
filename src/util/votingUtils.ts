@@ -1,4 +1,4 @@
-import { encodePacked, keccak256, toHex, fromHex } from "viem";
+import { encodePacked, keccak256, toHex, fromHex, toBytes } from "viem";
 
 /**
  * Generate a random identity secret for voting
@@ -15,16 +15,39 @@ export function generateIdentitySecret(): bigint {
 }
 
 /**
- * Generate a random salt for voting
+ * 1. STATIC MESSAGE GENERATOR
+ * The message must be identical on every device to produce the same signature/salt.
  */
-export function generateSalt(): bigint {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  let value = BigInt(0);
-  for (let i = 0; i < 31; i++) {
-    value = value * BigInt(256) + BigInt(array[i]);
-  }
-  return value;
+export function getSaltGenerationMessage(disputeId: string | number): string {
+  return `Slice Protocol: Generate secure voting secret for Dispute #${disputeId}. \n\nSign this message to derive your voting salt. This does not cast a vote or cost gas.`;
+}
+
+/**
+ * 2. DETERMINISTIC SALT DERIVATION
+ * Hashes the signature (which is unique to the user + dispute) to create the salt.
+ */
+export function deriveSaltFromSignature(signature: string): bigint {
+  const hash = keccak256(toBytes(signature));
+  return BigInt(hash);
+}
+
+/**
+ * 3. VOTE RECOVERY
+ * Brute-force checks if Vote 0 or Vote 1 matches the commitment found on-chain.
+ */
+export function recoverVote(
+  recoveredSalt: bigint,
+  onChainCommitment: string, // The hash stored in the contract
+): number {
+  // Check against Vote 0 (Defender)
+  const hash0 = calculateCommitment(0, recoveredSalt);
+  if (hash0 === onChainCommitment) return 0;
+
+  // Check against Vote 1 (Claimant)
+  const hash1 = calculateCommitment(1, recoveredSalt);
+  if (hash1 === onChainCommitment) return 1;
+
+  throw new Error("Signature derived salt does not match on-chain commitment.");
 }
 
 /**
