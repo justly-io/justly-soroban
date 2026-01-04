@@ -17,8 +17,19 @@ import {
   ArrowRight,
   ArrowLeft,
   Quote,
+  XIcon,
+  AudioLines,
 } from "lucide-react";
-import { shortenAddress } from "@/util/wallet";
+import {
+  MorphingDialog,
+  MorphingDialogTrigger,
+  MorphingDialogContainer,
+  MorphingDialogContent,
+  MorphingDialogImage,
+  MorphingDialogClose,
+  MorphingDialogTitle,
+  MorphingDialogDescription,
+} from "@/components/core/morphing-dialog";
 
 interface EvidenceViewProps {
   disputeId: string;
@@ -49,7 +60,6 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
   });
 
   const handleBack = () => router.back();
-  const openMedia = (url: string) => window.open(url, "_blank");
 
   // Determine colors based on role
   const isClaimant = role === "claimant";
@@ -101,7 +111,6 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
                 </div>
 
                 {/* Role Icon Badge */}
-                {/* Use explicit classes (bg-blue-500 / bg-gray-500) instead of dynamic strings */}
                 <div
                   className={`absolute -bottom-2 -right-2 p-1.5 rounded-full border-[3px] border-white shadow-sm flex items-center justify-center text-white ${
                     isClaimant ? "bg-blue-500" : "bg-gray-800"
@@ -123,7 +132,7 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
                   {partyInfo.role}
                 </span>
                 <h2 className="text-xl font-extrabold text-[#1b1c23] leading-tight">
-                  {shortenAddress(partyInfo.name)}
+                  {partyInfo.name}
                 </h2>
                 <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-gray-400 bg-gray-50 w-fit px-2 py-1 rounded-lg">
                   <Calendar className="w-3 h-3" />
@@ -157,78 +166,181 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
               <ImageIcon className="w-3.5 h-3.5 text-[#8c8fff]" /> Exhibits
             </h3>
 
-            <div className="flex flex-col gap-3">
-              {/* Audio Evidence */}
+            {/* Changed from Grid to Flex Column for full width */}
+            <div className="flex flex-col gap-4">
+              {/* 1. AUDIO EVIDENCE */}
               {audioEvidence && (
-                <div
-                  onClick={() => openMedia(audioEvidence.url!)}
-                  className="bg-[#1b1c23] rounded-[20px] p-4 flex items-center gap-4 shadow-lg shadow-gray-200 text-white relative overflow-hidden group cursor-pointer transition-transform hover:scale-[1.01]"
+                <MorphingDialog
+                  transition={{
+                    type: "spring",
+                    bounce: 0.05,
+                    duration: 0.25,
+                  }}
                 >
-                  <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white/5 to-transparent pointer-events-none" />
+                  <MorphingDialogTrigger className="w-full">
+                    <div className="bg-[#1b1c23] rounded-[20px] p-4 flex items-center gap-4 shadow-lg shadow-gray-200 text-white relative overflow-hidden group cursor-pointer transition-transform hover:scale-[1.01]">
+                      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white/5 to-transparent pointer-events-none" />
 
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0 backdrop-blur-md border border-white/10">
-                    <Mic className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 z-10">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                      Audio Recording
-                    </p>
-                    <p className="text-sm font-bold">
-                      {audioEvidence.duration}
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-white text-[#1b1c23] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                    <PlayCircle className="w-5 h-5 fill-current" />
-                  </div>
-                </div>
+                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0 backdrop-blur-md border border-white/10">
+                        <Mic className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 z-10 text-left">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                          Audio Recording
+                        </p>
+                        <p className="text-base font-semibold">
+                          {audioEvidence.duration}
+                        </p>
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-white text-[#1b1c23] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                        <PlayCircle className="w-5 h-5 fill-current" />
+                      </div>
+                    </div>
+                  </MorphingDialogTrigger>
+
+                  <MorphingDialogContainer>
+                    <MorphingDialogContent className="relative w-full max-w-sm bg-[#1b1c23] rounded-3xl overflow-hidden shadow-2xl border border-white/10 p-8 flex flex-col items-center gap-6">
+                      <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10 relative">
+                        <div className="absolute inset-0 rounded-full bg-[#8c8fff]/20 animate-pulse" />
+                        <AudioLines className="w-10 h-10 text-[#8c8fff]" />
+                      </div>
+
+                      <div className="text-center">
+                        <MorphingDialogTitle className="text-xl font-extrabold text-white mb-1">
+                          {audioEvidence.title}
+                        </MorphingDialogTitle>
+                        <MorphingDialogDescription className="text-sm font-medium text-gray-400">
+                          Recorded Statement
+                        </MorphingDialogDescription>
+                      </div>
+
+                      <audio
+                        controls
+                        src={audioEvidence.url!}
+                        className="w-full h-10 accent-[#8c8fff]"
+                        style={{ filter: "invert(1) hue-rotate(180deg)" }}
+                      />
+
+                      <MorphingDialogClose
+                        className="absolute top-4 right-4 bg-white/10 text-white p-2 rounded-full hover:bg-white/20 transition-colors"
+                        variants={{
+                          initial: { opacity: 0, scale: 0.8 },
+                          animate: { opacity: 1, scale: 1 },
+                          exit: { opacity: 0, scale: 0.8 },
+                        }}
+                      >
+                        <XIcon size={20} />
+                      </MorphingDialogClose>
+                    </MorphingDialogContent>
+                  </MorphingDialogContainer>
+                </MorphingDialog>
               )}
 
-              {/* Grid for Visuals */}
-              <div className="grid grid-cols-2 gap-3">
-                {imageEvidence.map((img) => (
-                  <button
-                    key={img.id}
-                    onClick={() => openMedia(img.url)}
-                    className="relative aspect-[4/3] bg-gray-100 rounded-[20px] overflow-hidden border border-white shadow-sm group hover:shadow-md transition-all active:scale-95"
-                  >
-                    <img
+              {/* 2. IMAGE EVIDENCE (Full Width) */}
+              {imageEvidence.map((img) => (
+                <MorphingDialog
+                  key={img.id}
+                  transition={{
+                    type: "spring",
+                    bounce: 0.05,
+                    duration: 0.25,
+                  }}
+                >
+                  <MorphingDialogTrigger className="relative aspect-[3/2] w-full bg-gray-100 rounded-[24px] overflow-hidden border border-white shadow-sm group hover:shadow-md transition-all active:scale-95 cursor-zoom-in">
+                    <MorphingDialogImage
                       src={img.url}
-                      alt="Evidence"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      alt={img.description}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-                      <span className="text-[9px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                        <ImageIcon className="w-2.5 h-2.5" /> IMG
+                    <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <ImageIcon className="w-3 h-3" />
+                        Image Evidence
                       </span>
                     </div>
-                  </button>
-                ))}
+                  </MorphingDialogTrigger>
 
-                {videoEvidence.map((vid) => (
-                  <button
-                    key={vid.id}
-                    onClick={() => openMedia(vid.url)}
-                    className="relative aspect-[4/3] bg-gray-900 rounded-[20px] overflow-hidden border border-white shadow-sm group hover:shadow-md transition-all active:scale-95"
-                  >
+                  <MorphingDialogContainer>
+                    <MorphingDialogContent className="relative rounded-2xl bg-black/90 p-0 shadow-2xl max-w-[90vw] max-h-[85vh] overflow-hidden border border-white/10">
+                      <MorphingDialogImage
+                        src={img.url}
+                        alt={img.description}
+                        className="w-full h-full max-h-[80vh] object-contain"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                        <p className="text-white text-sm font-medium">
+                          {img.description}
+                        </p>
+                      </div>
+                      <MorphingDialogClose
+                        className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full backdrop-blur-md hover:bg-black/70 transition-colors"
+                        variants={{
+                          initial: { opacity: 0, scale: 0.8 },
+                          animate: { opacity: 1, scale: 1 },
+                          exit: { opacity: 0, scale: 0.8 },
+                        }}
+                      >
+                        <XIcon size={20} />
+                      </MorphingDialogClose>
+                    </MorphingDialogContent>
+                  </MorphingDialogContainer>
+                </MorphingDialog>
+              ))}
+
+              {/* 3. VIDEO EVIDENCE (Full Width) */}
+              {videoEvidence.map((vid) => (
+                <MorphingDialog
+                  key={vid.id}
+                  transition={{
+                    type: "spring",
+                    bounce: 0.05,
+                    duration: 0.25,
+                  }}
+                >
+                  <MorphingDialogTrigger className="relative aspect-video w-full bg-gray-900 rounded-[24px] overflow-hidden border border-white shadow-sm group hover:shadow-md transition-all active:scale-95 cursor-zoom-in">
                     <img
                       src={vid.thumbnail || vid.url}
                       alt="Video"
                       className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity"
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform">
-                        <PlayCircle className="w-5 h-5 text-white fill-white" />
+                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform shadow-lg">
+                        <PlayCircle className="w-7 h-7 text-white fill-white" />
                       </div>
                     </div>
-                    <div className="absolute bottom-2 left-2 bg-red-500/90 px-2 py-1 rounded-lg border border-white/10">
-                      <span className="text-[9px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                        <PlayCircle className="w-2.5 h-2.5 fill-current" /> MP4
+                    <div className="absolute bottom-3 left-3 bg-red-500/90 px-3 py-1.5 rounded-xl border border-white/10 shadow-sm">
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <PlayCircle className="w-3 h-3 fill-current" /> Video
+                        Evidence
                       </span>
                     </div>
-                  </button>
-                ))}
-              </div>
+                  </MorphingDialogTrigger>
+
+                  <MorphingDialogContainer>
+                    <MorphingDialogContent className="relative w-full max-w-4xl bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                      <div className="aspect-video w-full">
+                        <video
+                          src={vid.url}
+                          controls
+                          autoPlay
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <MorphingDialogClose
+                        className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full backdrop-blur-md hover:bg-black/70 transition-colors z-50"
+                        variants={{
+                          initial: { opacity: 0, scale: 0.8 },
+                          animate: { opacity: 1, scale: 1 },
+                          exit: { opacity: 0, scale: 0.8 },
+                        }}
+                      >
+                        <XIcon size={20} />
+                      </MorphingDialogClose>
+                    </MorphingDialogContent>
+                  </MorphingDialogContainer>
+                </MorphingDialog>
+              ))}
             </div>
           </div>
         )}
@@ -250,7 +362,6 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
       <div className="flex-none p-6 bg-gradient-to-t from-white via-white/95 to-transparent z-20">
         <div className="relative bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-100 p-2 flex items-center justify-between min-h-[72px]">
           {/* 1. ABSOLUTE CENTERED DOTS */}
-          {/* Pointer-events-none ensures clicks pass through to buttons if they overlap on tiny screens */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <PaginationDots currentIndex={pageIndex} total={4} />
           </div>
