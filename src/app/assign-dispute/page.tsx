@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAssignDispute } from "@/hooks/useAssignDispute";
 import { Search, Loader2 } from "lucide-react";
-import { CategoryAmountHeader } from "@/components/category-amount/CategoryAmountHeader";
+import { DisputeOverviewHeader } from "@/components/dispute-overview/DisputeOverviewHeader";
 
 export default function AssignDisputePage() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function AssignDisputePage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 p-4">
-      <CategoryAmountHeader onBack={() => router.back()} />
+      <DisputeOverviewHeader onBack={() => router.back()} />
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center">
         {searchFailed ? (

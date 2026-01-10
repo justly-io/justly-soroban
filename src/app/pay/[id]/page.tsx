@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { CategoryAmountHeader } from "@/components/category-amount/CategoryAmountHeader";
+import { DisputeOverviewHeader } from "@/components/dispute-overview/DisputeOverviewHeader";
 import { InfoCard } from "@/components/category-amount/InfoCard";
 import { SwipeButton } from "@/components/category-amount/SwipeButton";
 import { usePayDispute } from "@/hooks/usePayDispute";
@@ -62,7 +62,7 @@ export default function PayDisputePage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 p-4">
-      <CategoryAmountHeader onBack={handleBack} />
+      <DisputeOverviewHeader onBack={handleBack} />
 
       <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center mb-4 flex-1">
         {/* Hero Animation */}
