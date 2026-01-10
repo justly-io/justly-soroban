@@ -1,5 +1,5 @@
 import React from "react";
-import { useTimer } from "@/providers/TimerContext";
+import { useTimer } from "@/contexts/TimerContext";
 
 export const TimerCard: React.FC = () => {
   const { timeInSeconds } = useTimer();

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { FullscreenIcon } from "./icons/EvidenceIcons";
+import { Maximize2 } from "lucide-react";
 
 interface EvidenceImage {
   id: string;
@@ -53,7 +53,7 @@ export const EvidenceCarousel: React.FC<EvidenceCarouselProps> = ({
                   onClick={() => handleFullscreen(image.url)}
                   aria-label="View fullscreen"
                 >
-                  <FullscreenIcon size={16} color="#1b1c23" />
+                  <Maximize2 className="w-4 h-4 text-[#1b1c23]" />
                 </button>
               </div>
             </div>
