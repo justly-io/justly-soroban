@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 import React from "react";
-import ContextProvider from "@/providers/Provider";
+import ContextProvider from "./providers";
 import { Geist } from "next/font/google";
 import localFont from "next/font/local";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";

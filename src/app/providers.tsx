@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { WagmiProvider as PrivyWagmiProvider } from "@privy-io/wagmi";
@@ -10,9 +10,11 @@ import {
 } from "wagmi";
 import { PRIVY_APP_ID, PRIVY_CLIENT_ID, IS_EMBEDDED } from "@/config/app";
 import { config } from "@/config";
-import { TimerProvider } from "@/providers/TimerContext";
+import { TimerProvider } from "@/contexts/TimerContext";
 import { AutoConnect } from "@/components/AutoConnect";
 import { activeChains, defaultChain } from "@/config/chains";
+
+import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
 
 const queryClient = new QueryClient();
 
@@ -51,10 +53,12 @@ export default function ContextProvider({
     >
       <QueryClientProvider client={queryClient}>
         <ActiveWagmiProvider config={config} initialState={initialState}>
-          <TimerProvider>
-            <AutoConnect />
-            {children}
-          </TimerProvider>
+          <SmartWalletsProvider>
+            <TimerProvider>
+              <AutoConnect />
+              {children}
+            </TimerProvider>
+          </SmartWalletsProvider>
         </ActiveWagmiProvider>
       </QueryClientProvider>
     </PrivyProvider>
