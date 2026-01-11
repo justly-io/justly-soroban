@@ -16,7 +16,7 @@ export function useTokenBalance() {
     functionName: "balanceOf",
     args: address ? [address] : undefined,
     query: {
-      enabled: !!address,
+      enabled: !!address && !!stakingToken,
     },
   });
 
