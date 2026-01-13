@@ -39,6 +39,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <meta name="base:app_id" content="696694666622bd23811761ec" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center min-h-screen bg-gray-100`}
       >
