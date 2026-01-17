@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useChainId, useAccount } from "wagmi";
-import { useFundWallet } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 import { RefreshCw, ArrowDownCircle, Send, QrCode } from "lucide-react";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
@@ -12,11 +11,8 @@ import { FaucetButton } from "./FaucetButton";
 
 export const BalanceCard: React.FC = () => {
   const router = useRouter();
-  const chainId = useChainId();
   const { address } = useAccount();
-
   const { formatted, loading: isLoading, refetch } = useTokenBalance();
-  const { fundWallet } = useFundWallet();
 
   const [isSendOpen, setIsSendOpen] = useState(false);
   const [isReceiveOpen, setIsReceiveOpen] = useState(false);
@@ -29,18 +25,6 @@ export const BalanceCard: React.FC = () => {
     const balance = parseFloat(formatted).toFixed(2);
     return `${balance} USDC`;
   }, [address, isLoading, formatted]);
-
-  const handleDeposit = () => {
-    if (!address) return;
-
-    fundWallet({
-      address,
-      options: {
-        chain: { id: chainId },
-        asset: "USDC",
-      },
-    });
-  };
 
   const actionBtnClass =
     "flex flex-col items-center gap-1 bg-none border-none text-white cursor-pointer p-0 hover:opacity-80 transition-opacity group";
@@ -99,7 +83,10 @@ export const BalanceCard: React.FC = () => {
 
         {/* Action Buttons (Right Side) */}
         <div className="flex gap-3 items-center shrink-0 self-end">
-          <button className={actionBtnClass} onClick={handleDeposit}>
+          <button
+            className={actionBtnClass}
+            onClick={() => setIsReceiveOpen(true)}
+          >
             <ArrowDownCircle className={iconClass} />
             <span className="font-manrope font-semibold text-xs tracking-[-0.12px] leading-none">
               Deposit
