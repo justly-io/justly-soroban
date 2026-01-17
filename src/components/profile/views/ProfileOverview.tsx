@@ -2,7 +2,14 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Trophy, Flame, Target, Wallet, ShieldAlert } from "lucide-react";
+import {
+  Trophy,
+  Flame,
+  Target,
+  Wallet,
+  Briefcase,
+  ArrowRight,
+} from "lucide-react";
 import { useJurorStats } from "@/hooks/useJurorStats";
 import { useWithdraw } from "@/hooks/useWithdraw";
 import { Button } from "@/components/ui/button";
@@ -108,27 +115,27 @@ export const ProfileOverview = () => {
         </div>
       )}
 
-      {/* 3. Primary Action */}
+      {/* 3. Primary Action: Go to Dispute Manager */}
       <Button
-        onClick={() => router.push("/create")}
+        onClick={() => router.push("/manage")}
         className="h-auto py-5 flex items-center justify-between px-6 rounded-[20px] bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-[#8c8fff] transition-all group"
         variant="ghost"
       >
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-[#1b1c23] text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-            <ShieldAlert className="w-6 h-6" />
+            <Briefcase className="w-5 h-5" />
           </div>
           <div className="text-left">
             <span className="block text-sm font-extrabold text-[#1b1c23]">
-              Create New Dispute
+              Dispute Manager
             </span>
             <span className="text-[11px] font-medium text-gray-400">
-              Start a case in General Court
+              Create cases, submit evidence & pay
             </span>
           </div>
         </div>
-        <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">
-          <span className="text-xl leading-none mb-1 text-gray-400">›</span>
+        <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#8c8fff] group-hover:text-white transition-colors">
+          <ArrowRight className="w-4 h-4" />
         </div>
       </Button>
     </div>
