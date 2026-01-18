@@ -6,8 +6,7 @@ import { useAccount, useChainId } from "wagmi";
 import { getVoteData } from "@/util/votingStorage";
 import { getContractsForChain } from "@/config/contracts";
 
-const STATUS_COMMIT = 1;
-const STATUS_REVEAL = 2;
+import { DISPUTE_STATUS } from "@/config/constants";
 
 export function useVote(disputeId: string) {
   const chainId = useChainId();
@@ -69,8 +68,8 @@ export function useVote(disputeId: string) {
 
   // Derived State
   const currentStatus = dispute?.status;
-  const isCommitPhase = currentStatus === STATUS_COMMIT;
-  const isRevealPhase = currentStatus === STATUS_REVEAL;
+  const isCommitPhase = currentStatus === DISPUTE_STATUS.COMMIT;
+  const isRevealPhase = currentStatus === DISPUTE_STATUS.REVEAL;
 
   const isCommitDisabled =
     isProcessing ||

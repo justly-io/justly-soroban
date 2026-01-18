@@ -1,4 +1,5 @@
 import { useReadContract, useReadContracts } from "wagmi";
+import { DISPUTE_STATUS } from "@/config/constants";
 import { SLICE_ABI } from "@/config/contracts";
 import { useContracts } from "@/hooks/useContracts";
 import { transformDisputeData, type DisputeUI } from "@/util/disputeAdapter";
@@ -145,7 +146,7 @@ export function useDisputeList(
       // --- Filter out Finished disputes if activeOnly is true ---
       if (options?.activeOnly) {
         // Status 3 = Finished/Resolved
-        finalDisputes = finalDisputes.filter((d) => d.status !== 3);
+        finalDisputes = finalDisputes.filter((d) => d.status !== DISPUTE_STATUS.RESOLVED);
       }
 
       setDisputes(finalDisputes);
