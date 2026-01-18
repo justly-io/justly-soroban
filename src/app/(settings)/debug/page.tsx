@@ -21,11 +21,6 @@ import { SLICE_ABI } from "@/config/contracts";
 import { useContracts } from "@/hooks/useContracts";
 import { GlobalStateCard } from "@/components/debug/GlobalStateCard";
 import { DisputeInspector } from "@/components/debug/DisputeInspector";
-import { CryptoToolsCard } from "@/components/debug/CryptoToolsCard";
-import { NativeSendCard } from "@/components/debug/NativeSendCard";
-import { BaseRawDebugger } from "@/components/debug/BaseRawDebugger";
-import { MinimalDebugger } from "@/components/debug/MinimalDebugger";
-import { SmartDebugger } from "@/components/debug/SmartDebugger";
 import { DebugToggle } from "@/components/debug/DebugToggle";
 
 export default function DebugPage() {
@@ -305,32 +300,6 @@ export default function DebugPage() {
           isVoting={isVoting}
           logs={logs}
         />
-
-        {/* Separator / Toggle */}
-        <div className="flex items-center justify-center py-2">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-[#1b1c23] transition-colors"
-          >
-            {showAdvanced ? "Hide Advanced Tools" : "Show Advanced Tools"}
-            {showAdvanced ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </button>
-        </div>
-
-        {/* Advanced / Low Level Tools */}
-        {showAdvanced && (
-          <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <NativeSendCard />
-            <BaseRawDebugger />
-            <MinimalDebugger />
-            <SmartDebugger />
-            <CryptoToolsCard />
-          </div>
-        )}
       </div>
 
       {/* Bottom Right toggle*/}

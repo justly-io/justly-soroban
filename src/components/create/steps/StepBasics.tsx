@@ -1,64 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import { Users, ChevronDown, ChevronUp, Clock } from "lucide-react";
 
 import type { StepProps } from "../types";
-
-type TimeUnit = "days" | "hours";
+import { useStepBasics } from "@/hooks/useStepBasics";
 
 export const StepBasics: React.FC<StepProps> = ({ data, updateField }) => {
-  const [timeUnit, setTimeUnit] = useState<TimeUnit>("days");
-  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  const {
+    timeUnit,
+    isTimelineOpen,
+    setIsTimelineOpen,
+    getDisplayValue,
+    handleTimeChange,
+    handleUnitChange,
+    sliderMin,
+    sliderMax,
+    sliderStep,
+    payHours,
+    evidenceHours,
+    votingHours,
+    formatDuration,
+  } = useStepBasics({ data, updateField });
 
-  // Convert hours to display value based on unit
-  const getDisplayValue = () => {
-    if (timeUnit === "days") {
-      return Math.floor(data.deadlineHours / 24);
-    }
-    return data.deadlineHours;
-  };
-
-  // Update hours when slider changes
-  const handleTimeChange = (value: number) => {
-    if (timeUnit === "days") {
-      updateField("deadlineHours", value * 24);
-    } else {
-      updateField("deadlineHours", value);
-    }
-  };
-
-  // When switching units, adjust the value to stay within bounds
-  const handleUnitChange = (newUnit: TimeUnit) => {
-    setTimeUnit(newUnit);
-    if (newUnit === "days") {
-      // Round to nearest day, ensure at least 1 day
-      const days = Math.max(1, Math.round(data.deadlineHours / 24));
-      updateField("deadlineHours", Math.min(days * 24, 168));
-    }
-  };
-
-  const sliderMin = timeUnit === "days" ? 1 : 1;
-  const sliderMax = timeUnit === "days" ? 7 : 24;
-  const sliderStep = timeUnit === "days" ? 1 : 1;
-
-  // Calculate phase durations for display (in hours)
-  const totalHours = data.deadlineHours;
-  const payHours = Math.max(1, Math.round(totalHours * 0.1));
-  const remainingHours = totalHours - payHours;
-  const evidenceHours = Math.round(remainingHours * 0.45);
-  const votingHours = Math.round(remainingHours * 0.55);
-
-  // Format hours to days/hours string
-  const formatDuration = (hours: number) => {
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      const remainingHrs = hours % 24;
-      if (remainingHrs === 0) {
-        return `${days} day${days > 1 ? "s" : ""}`;
-      }
-      return `${days}d ${remainingHrs}h`;
-    }
-    return `${hours} hour${hours > 1 ? "s" : ""}`;
-  };
   return (
     <div className="flex flex-col gap-5 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="flex flex-col gap-2">
@@ -133,22 +95,20 @@ export const StepBasics: React.FC<StepProps> = ({ data, updateField }) => {
           <button
             type="button"
             onClick={() => handleUnitChange("days")}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
-              timeUnit === "days"
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${timeUnit === "days"
                 ? "bg-[#1b1c23] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+              }`}
           >
             Days
           </button>
           <button
             type="button"
             onClick={() => handleUnitChange("hours")}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
-              timeUnit === "hours"
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${timeUnit === "hours"
                 ? "bg-[#1b1c23] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+              }`}
           >
             Hours
           </button>
