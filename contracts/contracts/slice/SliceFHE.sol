@@ -14,7 +14,7 @@ contract SliceV2 is Ownable, ReentrancyGuard {
     uint256 public disputeCount;
 
     enum DisputeStatus {
-        Created, // Uplading evidence
+        Created, // Uploading evidence
         Voting, // Voting
         Revealing, // Revealing
         Finished // Finished
@@ -64,7 +64,7 @@ contract SliceV2 is Ownable, ReentrancyGuard {
     event Withdrawn(address indexed user, uint256 amount);
     event Staked(address indexed user, uint256 amount);
 
-    mapping(uint256 => Dispute) public disputes; // Disputeid => Dispute
+    mapping(uint256 => Dispute) public disputes; // Dispute id => Dispute
     mapping(address => UserStats) public userStats; // Address => UserStats
 
     constructor(address _stakingToken) Ownable(msg.sender) {

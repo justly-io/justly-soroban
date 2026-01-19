@@ -1,12 +1,36 @@
-# FHEVM Hardhat Template
+# Slice Protocol ⚖️
 
-A Hardhat-based template for developing Fully Homomorphic Encryption (FHE) enabled Solidity smart contracts using the
-FHEVM protocol by Zama.
+**The Neutral, On-Chain Dispute Resolution Protocol.**
 
-## Quick Start
+Slice is an oracle for justice. It produces reliable rulings for external contracts through a trustless mechanism of random juror selection, commit-reveal voting, and crypto-economic staking.
 
-For detailed instructions see:
-[FHEVM Hardhat Quick Start Tutorial](https://docs.zama.ai/protocol/solidity-guides/getting-started/quick-start-tutorial)
+This repository contains the **Hardhat** development environment for the Slice smart contracts.
+
+---
+
+## Protocol Roadmap & Versioning
+
+We are currently on **Slice V1.1**. The codebase is evolving through strict architectural stages to ensure security and scalability.
+
+### Current: Slice V1.1 ("The Active Draft")
+* **Mechanism:** Jurors manually "draw" disputes from an open queue.
+* **Matchmaking:** `prevrandao`-based random assignment.
+* **Staking:** Per-dispute staking (Jurors lock funds only when they join a specific case).
+* **Tech:** Solidity, Open Queue (Swap-and-Pop), Commit-Reveal.
+
+### Next Up: Slice V1.2 ("The High-Stakes Lottery")
+* **Mechanism:** Passive Global Staking. Jurors stake into a global pool once.
+* **Economic Security:** **High Assurance Model.** If selected, the juror's *entire* staked balance moves to the dispute to maximize skin-in-the-game.
+* **Probability:** Linear weighting (Higher stake = Higher selection chance).
+* **Exit:** Rapid exit mechanism with short cooldowns (e.g., 4 hours).
+
+### Future: Slice V1.3 ("True Randomness")
+* **Entropy:** Integration of **Chainlink VRF** to replace `prevrandao`.
+* **UX:** Event-driven architecture. Jurors are notified off-chain when selected.
+
+### Long-Term: FHE Privacy (Zama Integration)
+* **Goal:** Fully private voting and evidence handling using Fully Homomorphic Encryption (FHE).
+* **Template:** This project is initialized using the **Zama FHEVM template** to ensure our foundation is ready for this future privacy layer when the time comes.
 
 ---
 
@@ -15,15 +39,13 @@ For detailed instructions see:
 * **Node.js**: Version 20 or higher
 * **pnpm**: Package manager
 
-Install pnpm if you don’t have it:
-
 ```bash
 npm install -g pnpm
 ```
 
 ---
 
-## Installation
+## Installation & Setup
 
 ### 1. Install dependencies
 
@@ -31,49 +53,50 @@ npm install -g pnpm
 pnpm install
 ```
 
-### 2. Set up environment variables
+### 2. Environment Variables
+
+Create a `.env` file or set variables via the CLI:
 
 ```bash
 pnpm hardhat vars set MNEMONIC
-
-# Set your Infura API key for network access
 pnpm hardhat vars set INFURA_API_KEY
-
-# Optional: Set Etherscan API key for contract verification
-pnpm hardhat vars set ETHERSCAN_API_KEY
+pnpm hardhat vars set ETHERSCAN_API_KEY # Optional: for verification
 ```
 
-### 3. Compile and test
+### 3. Compile Contracts
 
 ```bash
 pnpm run compile
+```
+
+### 4. Run Tests
+
+```bash
 pnpm run test
 ```
 
-### 4. Deploy to local network
+---
+
+## ⛓ Deployment
+
+### Local Network (Hardhat Network)
 
 ```bash
-# Start a local FHEVM-ready node
+# Start the node
 pnpm hardhat node
 
-# Deploy to local network
+# Deploy (in a separate terminal)
 pnpm hardhat deploy --network localhost
 ```
 
-### 5. Deploy to Sepolia Testnet
+### Testnet (Sepolia)
 
 ```bash
-# Deploy to Sepolia
+# Deploy
 pnpm hardhat deploy --network sepolia
 
-# Verify contract on Etherscan
+# Verify
 pnpm hardhat verify --network sepolia <CONTRACT_ADDRESS>
-```
-
-### 6. Test on Sepolia Testnet
-
-```bash
-pnpm hardhat test --network sepolia
 ```
 
 ---
@@ -81,51 +104,32 @@ pnpm hardhat test --network sepolia
 ## 📁 Project Structure
 
 ```
-fhevm-hardhat-template/
-├── contracts/           # Smart contract source files
-│   └── FHECounter.sol   # Example FHE counter contract
-├── deploy/              # Deployment scripts
-├── tasks/               # Hardhat custom tasks
-├── test/                # Test files
-├── hardhat.config.ts    # Hardhat configuration
-└── package.json         # Dependencies and scripts
+slice-protocol/
+├── contracts/           # Core Protocol Logic
+│   ├── Slice.sol        # Main V1.1 Contract (Draft/Queue System)
+│   └── interfaces/      # Shared interfaces
+├── deploy/              # Hardhat deploy scripts
+├── test/                # Mocha/Chai tests
+├── tasks/               # Custom Hardhat tasks
+└── hardhat.config.ts    # Network & Compiler config
 ```
 
 ---
 
-## 📜 Available Scripts
+## 📜 Scripts
 
-| Script              | Description              |
-| ------------------- | ------------------------ |
-| `pnpm run compile`  | Compile all contracts    |
-| `pnpm run test`     | Run all tests            |
-| `pnpm run coverage` | Generate coverage report |
-| `pnpm run lint`     | Run linting checks       |
-| `pnpm run clean`    | Clean build artifacts    |
-
----
-
-## 📚 Documentation
-
-* [FHEVM Documentation](https://docs.zama.ai/fhevm)
-* [FHEVM Hardhat Setup Guide](https://docs.zama.ai/protocol/solidity-guides/getting-started/setup)
-* [FHEVM Testing Guide](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat/write_test)
-* [FHEVM Hardhat Plugin](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat)
+| Script | Description |
+|--------|-------------|
+| `pnpm run compile` | Compiles Solidity contracts |
+| `pnpm run test` | Runs the full test suite |
+| `pnpm run coverage` | Generates code coverage report |
+| `pnpm run lint` | Runs Solhint and ESLint |
+| `pnpm run clean` | Removes artifacts and cache |
 
 ---
 
 ## 📄 License
 
-This project is licensed under the BSD-3-Clause-Clear License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
----
-
-## 🆘 Support
-
-* **GitHub Issues**: [https://github.com/zama-ai/fhevm/issues](https://github.com/zama-ai/fhevm/issues)
-* **Documentation**: [https://docs.zama.ai](https://docs.zama.ai)
-* **Community**: [https://discord.gg/zama](https://discord.gg/zama)
-
----
-
-**Built with ❤️ by the Zama team**
+**Built for Justice.**

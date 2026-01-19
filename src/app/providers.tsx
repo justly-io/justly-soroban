@@ -64,20 +64,3 @@ export default function ContextProvider({ children, tenant, initialState }: Prop
     </PrivyProvider>
   );
 }
-export function ChainGuard() {
-  const { chainId, isConnected } = useAccount();
-  const { switchChain } = useSwitchChain();
-
-  useEffect(() => {
-    // Only enforce in dev mode to avoid annoying users in prod
-    if (process.env.NEXT_PUBLIC_APP_ENV !== "development") return;
-
-    // If connected, but to the wrong chain (e.g., 31337 instead of 84532)
-    if (isConnected && chainId && chainId !== defaultChain.id) {
-      console.log(`[ChainGuard] Mismatch detected. Switching from ${chainId} to ${defaultChain.id}`);
-      switchChain({ chainId: defaultChain.id });
-    }
-  }, [chainId, isConnected, switchChain]);
-
-  return null;
-}
