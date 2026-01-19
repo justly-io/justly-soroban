@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 import { RefreshCw, ArrowDownCircle, Send, QrCode } from "lucide-react";
-import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useTokenBalance } from "@/hooks/core/useTokenBalance";
 import { SendModal } from "./SendModal";
 import { ReceiveModal } from "./ReceiveModal";
 import { FaucetButton } from "./FaucetButton";
@@ -34,7 +34,7 @@ export const BalanceCard: React.FC = () => {
   return (
     <>
       {/* Added 'relative' here to position the refresh button */}
-      <div className="relative bg-[#1b1c23] rounded-[21px] pt-[26px] px-[28px] pb-6 mt-[50px] mx-5 w-auto min-h-[110px] flex flex-row justify-between items-end text-white box-border">
+      <div className="relative bg-[#1b1c23] rounded-[21px] pt-6 px-6 pb-6 mt-12 mx-5 w-auto min-h-28 flex flex-row justify-between items-end text-white box-border">
         {/* Top Right Refresh Button */}
         <button
           onClick={() => refetch()}
@@ -46,7 +46,7 @@ export const BalanceCard: React.FC = () => {
 
         {/* Left Section */}
         <div className="flex flex-col gap-2.5 items-start flex-1 justify-start">
-          <div className="flex flex-col gap-[9px] w-auto mb-0">
+          <div className="flex flex-col gap-2 w-auto mb-0">
             <div className="font-manrope font-semibold text-[13px] leading-none opacity-70 tracking-[-0.26px] text-white">
               Balance
             </div>

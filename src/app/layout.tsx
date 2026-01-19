@@ -8,8 +8,8 @@ import localFont from "next/font/local";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { ConsoleOverlay } from "@/components/debug/ConsoleOverlay";
 import { getTenantFromHost, Tenant } from "@/config/tenant";
-import { beexoConfig } from "@/config/beexoConfig";
-import { webConfig } from "@/config";
+import { beexoConfig } from "@/adapters/beexo";
+import { webConfig } from "@/adapters/web";
 import { cookieToInitialState } from "wagmi";
 
 export const metadata: Metadata = {

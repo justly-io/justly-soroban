@@ -1,6 +1,7 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
+import { useSliceAccount } from "@/hooks/core/useSliceAccount";
+import { useSliceConnect } from "@/hooks/core/useSliceConnect";
 import { Copy, LogOut, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,12 +12,13 @@ export const SessionModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const { user, logout } = usePrivy();
+  const { address, userId } = useSliceAccount();
+  const { disconnect } = useSliceConnect();
 
-  if (!isOpen || !user) return null;
+  if (!isOpen || !userId) return null;
 
   // Get the display address (embedded wallet or connected external wallet)
-  const displayAddress = user.wallet?.address || "";
+  const displayAddress = address || "";
   const shortAddress = displayAddress
     ? `${displayAddress.slice(0, 6)}...${displayAddress.slice(-4)}`
     : "No Wallet";
@@ -27,7 +29,7 @@ export const SessionModal = ({
   };
 
   const handleLogout = async () => {
-    await logout();
+    await disconnect();
     onClose();
   };
 
@@ -76,7 +78,7 @@ export const SessionModal = ({
         {/* User ID (Optional) */}
         <div className="mb-6 px-2">
           <p className="text-xs text-gray-400 truncate">
-            <span className="font-bold">Privy ID:</span> {user.id}
+            <span className="font-bold">Privy ID:</span> {userId}
           </p>
         </div>
 
