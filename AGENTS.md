@@ -8,38 +8,41 @@ This document defines the architectural rules, development standards, and techni
 
 ### 1. Multi-Tenant Strategy Pattern
 
-This application runs across multiple environments (PWA, Beexo, Base MiniApp) using a single codebase.
+This application runs across multiple environments (PWA, **Stellar MiniApp**) using a single codebase.
 
-> **Rule:** Do **not** use conditional logic inside UI components (e.g., `if (isBeexo)` or `if (isMiniApp)`).
+> **Rule:** Do **not** use conditional logic inside UI components (e.g., `if (isStellar)`).
 
 #### Design Requirements
 
-**Abstraction Layer**  
+**Abstraction Layer**
+
 All wallet interactions must go through a dedicated adapter layer and a single unified provider component. UI components must never talk directly to wallet SDKs or RPC providers.
 
-**Tenant Detection**  
+**Tenant Detection**
+
 Tenants are detected using request metadata (such as host, origin, or runtime signals) and resolved before any wallet or chain logic is initialized.
 
 **Strategies**
-- **Web / PWA** → `Privy + Wagmi` (Smart Wallets via ERC-4337)
-- **Beexo** → `Wagmi` with injected `xo-connect` provider (EIP-1193)
+
+- **Web / PWA / Stellar MiniApp** → `Stellar SDK` + `Freighter` (Soroban)
 
 ---
 
 ### 2. State Management
 
-**On-chain data**  
-Use **Wagmi v2** hooks:
-- `useReadContract`
-- `useWriteContract`
+**On-chain data**
+
+- **Stellar:** Use **Soroban React** hooks or direct SDK calls via the Adapter.
 
 Combined with **TanStack Query** for caching and synchronization.
 
-**Local state**  
+**Local state**
+
 Use typed LocalStorage helpers for temporary client-side data (for example commit-reveal salts and voting metadata).
 
 **Client / Server separation**
-- `wagmi` hooks → **Client Components only** (`"use client"`)
+
+- Blockchain hooks → **Client Components only** (`"use client"`)
 - Server Components → layout, static data, or configuration only
 
 ---
@@ -47,20 +50,22 @@ Use typed LocalStorage helpers for temporary client-side data (for example commi
 ## Tech Stack & Standards
 
 - **Framework:** Next.js 16 (App Router)
-- **Blockchain interaction:** Viem + Wagmi v2
-  > Do **not** use Ethers.js.
+- **Blockchain interaction:**
+  - **Stellar:** @stellar/stellar-sdk (Soroban)
+
 - **Styling:** Tailwind CSS + shadcn/ui
   - **UI rule:** Avoid `text-sm` for body copy in embedded contexts (MiniApps)
   - Prefer `text-base` for readability
+
 - **Authentication:**
-  - Privy → Web / PWA / Base
-  - Injected providers → Beexo
+  - Freighter/Lobstr → Stellar
+  - Passkeys → Supabase Auth
 
 ### Required Standards
 
-- **ERC-4337** → Account Abstraction (PWA users)
-- **EIP-1193** → Provider interface (Beexo integration)
-- **EIP-712** → Typed data signing (when applicable)
+- **Soroban** → Rust Smart Contracts (Stellar integration)
+- **SEP-0007** → Stellar URI scheme for deep linking
+- **SEP-0010** → Stellar Web Authentication
 
 ---
 
@@ -76,23 +81,29 @@ pnpm install
 pnpm dev
 ```
 
-- **Standard mode:** http://localhost:3000
-- **Beexo simulation:**
-  - Inject a compatible provider in the browser, or
-  - Mock the `Host` header to trigger Beexo tenant detection
+**Access the application:**
+
+- **Standard mode:** `http://localhost:3000`
+- **Stellar mode:** Access via `stellar.` subdomain (local DNS mapping required).
 
 ---
 
 ### 2. Smart Contract Development
 
+**Soroban (Stellar)**
+
 ```bash
 cd contracts
+soroban contract build
+soroban contract deploy --network testnet
+soroban contract invoke --id C... --fn get_dispute -- --dispute_id 1
+```
 
-# Compile
-pnpm hardhat compile
+**Testing Contracts**
 
-# Deploy to Base Sepolia
-pnpm hardhat deploy --network baseSepolia
+```bash
+cargo test
+soroban contract optimize --wasm target/wasm32-unknown-unknown/release/slice.wasm
 ```
 
 ---
@@ -102,11 +113,15 @@ pnpm hardhat deploy --network baseSepolia
 Dispute metadata is stored on IPFS using **Pinata**.
 
 **Rules:**
+
 - Always use the shared IPFS utility module provided by the application to ensure consistent metadata formatting and error handling.
+
   ```
   src/util/ipfs.ts
   ```
+
 - Evidence JSON must match the `DisputeUI` interface used by the frontend to guarantee correct decoding and rendering.
+
   ```
   src/util/disputeAdapter.ts
   ```
@@ -117,17 +132,27 @@ Dispute metadata is stored on IPFS using **Pinata**.
 
 ### Component Rules
 
-1. **Wallet-agnostic**  
-   Components must consume `useAccount` or `useSliceAccount` and never depend on connection method.
+1. **Wallet-agnostic**
 
-2. **Strict typing**  
+   Components must consume `useSliceAccount` and never depend on connection method or specific chain logic directly.
+
+2. **Strict typing**
+
    Use `DisputeUI` for all frontend dispute representations.
 
-3. **Error handling**  
+3. **Error handling**
+
    Use `sonner` for user-facing notifications:
+
    ```ts
    toast.error("Message")
    ```
+
+4. **Stellar-specific**
+
+   - Always handle XDR encoding/decoding with proper error boundaries
+   - Use stroops (1 XLM = 10,000,000 stroops) for all amount calculations
+   - Validate account addresses using `StrKey.isValidEd25519PublicKey()`
 
 ---
 
@@ -136,10 +161,10 @@ Dispute metadata is stored on IPFS using **Pinata**.
 Follow **Conventional Commits**:
 
 ```text
-feat(adapter): add lemon wallet support
+feat(adapter): add stellar freighter support
 fix(voting): resolve salt generation issue
 style(ui): update font sizes for mobile
-chore(contracts): recompile abis
+chore(contracts): recompile soroban contracts
 ```
 
 ---
@@ -149,12 +174,38 @@ chore(contracts): recompile abis
 > **DO NOT COMMIT SECRETS**
 
 The application requires several environment variables for:
+
 - Runtime mode selection (development vs production)
 - Authentication providers
 - IPFS / storage backends
-- Blockchain network configuration and contract addresses
+- Stellar network configuration (Testnet/Mainnet)
+- Soroban RPC endpoints
+- Horizon API endpoints
 
 These values must be provided via your local environment configuration mechanism and deployment platform secrets.
+
+---
+
+## Stellar-Specific Guidelines
+
+### Network Configuration
+
+- **Testnet:** Use for all development and testing
+- **Mainnet:** Production deployments only
+- Always specify network passphrase explicitly in contract calls
+
+### Transaction Building
+
+- Use `TransactionBuilder` from `@stellar/stellar-sdk`
+- Set appropriate timeouts (default: 180 seconds)
+- Always simulate transactions before submission
+- Handle authorization entries for smart contract invocations
+
+### Asset Handling
+
+- Native asset: `Asset.native()` for XLM
+- Custom assets: Validate issuer and asset code
+- USDC: Use Stellar-native USDC contract address
 
 ---
 

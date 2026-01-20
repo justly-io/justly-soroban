@@ -1,6 +1,6 @@
 # ⚖️ Slice Protocol Application
 
-This project is the frontend implementation for **Slice**, a **Real-Time Dispute Resolution Protocol** built on Next.js. It features a **multi-tenant architecture** capable of running as a standalone PWA or as an embedded MiniApp across various wallet ecosystems (Base, Beexo).
+This project is the frontend implementation for **Slice**, a **Real-Time Dispute Resolution Protocol** built on Next.js. It features a **multi-tenant architecture** capable of running as a standalone PWA or as an embedded MiniApp across the **Stellar** ecosystem.
 
 **🔗 Live Demo**: [Testnet](https://dev.slicehub.xyz) | [Mainnet](https://app.slicehub.xyz)
 
@@ -11,10 +11,11 @@ This project is the frontend implementation for **Slice**, a **Real-Time Dispute
 **Slice** is a **decentralized, real-time dispute resolution protocol**. It acts as a **neutral truth oracle** that resolves disputes quickly and trustlessly through **randomly selected jurors** and **economic incentives**.
 
 We are building the **"Uber for Justice"**:
-* **Decentralized & Trustless:** No central authority controls the outcome.
-* **Fast & Scalable:** Designed for real-time applications, offering quick rulings compared to traditional courts.
-* **Gamified Justice:** Jurors enter the Dispute Resolution Market via an **intuitive and entertaining App/MiniApp**.
-* **Earn by Ruling:** Users stake tokens to become jurors and **earn money** by correctly reviewing evidence and voting on disputes.
+
+- **Decentralized & Trustless:** No central authority controls the outcome.
+- **Fast & Scalable:** Designed for real-time applications, offering quick rulings compared to traditional courts.
+- **Gamified Justice:** Jurors enter the Dispute Resolution Market via an **intuitive and entertaining App/MiniApp**.
+- **Earn by Ruling:** Users stake tokens to become jurors and **earn money** by correctly reviewing evidence and voting on disputes.
 
 ---
 
@@ -24,39 +25,35 @@ This application uses a **Strategy Pattern** to manage wallet connections and SD
 
 ### 1. Connection Strategies
 
-We support two active connection strategies (with Lemon planned):
+We support the Stellar SDK for wallet connectivity:
 
 | Strategy | Description | Used By |
 |----------|-------------|---------|
-| **Wagmi SW** | Uses Smart Wallets (Coinbase/Safe) via Privy & Wagmi. | **PWA**, **Base** |
-| **Wagmi EOA** | Uses standard Injected (EOA) connectors. | **Beexo** |
-| *(Planned)* Lemon SDK | Native `@lemoncash/mini-app-sdk`. | Lemon |
+| **Stellar SDK** | Uses `@stellar/stellar-sdk` and Freighter/Lobstr. | **PWA**, **Stellar MiniApp** |
 
 ### 2. Supported MiniApps & Environments
 
 The application behaves differently depending on the access point (Subdomain) and injected providers.
 
 | Platform | Subdomain | Connection Strategy | Auth Type |
-| :--- | :--- | :--- | :--- |
-| **Standard PWA** | `app.` | **Wagmi SW** | Social / Email / **Passkey** 🆕 / Wallet |
-| **Base MiniApp** | `base.` | **Wagmi SW** | Coinbase Smart Wallet |
-| **Beexo** | `beexo.` | **Wagmi EOA** | Injected Provider (Beexo) |
-| **Lemon (planned)** | `lemon.` | Lemon SDK | Native Lemon Auth |
+|:---------|:----------|:-------------------|:----------|
+| **Standard PWA** | `app.` | **Stellar SDK** | Freighter / Lobstr / **Passkey** 🆕 |
+| **Stellar MiniApp** | `stellar.` | **Stellar SDK** | Freighter / Lobstr |
 
 ---
 
 ## 🚀 Try Slice Now
 
-Experience the future of decentralized justice on **Base**:
+Experience the future of decentralized justice:
 
-* **Testnet Demo**: [dev.slicehub.xyz](https://dev.slicehub.xyz) – (Base Sepolia)
-* **Mainnet App**: [app.slicehub.xyz](https://app.slicehub.xyz) – (Base)
+- **Testnet Demo**: [dev.slicehub.xyz](https://dev.slicehub.xyz)
+- **Mainnet App**: [app.slicehub.xyz](https://app.slicehub.xyz)
 
 ---
 
 ## ⚖️ How It Works (The Juror Flow)
 
-1. **Enter the Market:** Users open the Slice App or MiniApp and **stake USDC** to join the juror pool.
+1. **Enter the Market:** Users open the Slice App or MiniApp and **stake tokens** (USDC/XLM) to join the juror pool.
 2. **Get Drafted:** When a dispute arises, jurors are randomly selected (Drafted) to review the case.
 3. **Review & Vote:** Jurors analyze the evidence provided by both parties and vote privately on the outcome.
 4. **Earn Rewards:** If their vote aligns with the majority consensus, they **earn fees** from the losing party.
@@ -69,13 +66,16 @@ Experience the future of decentralized justice on **Base**:
 Integrating Slice into your protocol is as simple as 1-2-3:
 
 ### 1. Create a Dispute
-Call `slice.createDispute(defender, category, ipfsHash, jurorsRequired)` from your contract.
+
+Call `slice.createDispute(defender, category, ipfsHash, jurorsRequired)` from your Soroban contract.
 
 ### 2. Wait for Ruling
-Slice handles the juror selection, voting, and consensus off-chain and on-chain.
+
+Slice handles the juror selection, voting, and consensus on-chain.
 
 ### 3. Read the Verdict
-Once the dispute status is `Executed`, read the `winner` address from the `disputes` mapping and execute your logic.
+
+Once the dispute status is `Executed`, read the `winner` address from the contract state and execute your logic.
 
 ---
 
@@ -83,8 +83,8 @@ Once the dispute status is `Executed`, read the `winner` address from the `dispu
 
 | Network | Slice Core | USDC Token |
 |---------|------------|------------|
-| **Base Sepolia** | `0xD8A10bD25e0E5dAD717372fA0C66d3a59a425e4D` | `0x5dEaC602762362FE5f135FA5904351916053cF70` |
-| **Base Mainnet** | `0xD8A10bD25e0E5dAD717372fA0C66d3a59a425e4D` | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| **Stellar Testnet** | *Coming Soon* | *Coming Soon* |
+| **Stellar Mainnet** | *Coming Soon* | *Coming Soon* |
 
 ---
 
@@ -95,27 +95,24 @@ Once the dispute status is `Executed`, read the `winner` address from the `dispu
 Rename `.env.example` to `.env.local` and add your keys.
 
 ```bash
-    NEXT_PUBLIC_APP_ENV="development" # or 'production'
-    
-    # Pinata / IPFS Config
-    # https://app.pinata.cloud/   
-    NEXT_PUBLIC_PINATA_JWT="your_pinata_jwt"
-    NEXT_PUBLIC_PINATA_GATEWAY_URL="your_gateway_url"
-    
-    # Privy Config (For PWA/Base/Farcaster)
-    # https://dashboard.privy.io/
-    NEXT_PUBLIC_PRIVY_APP_ID="your_privy_app_id"
-    NEXT_PUBLIC_PRIVY_CLIENT_ID="your_privy_client_id"
-    
-    # Supabase Auth (For Passkeys & Email Auth) 🆕
-    # https://supabase.com/dashboard/project/_/settings/api
-    NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-    NEXT_PUBLIC_SUPABASE_ANON_KEY="your_anon_key"
-    SUPABASE_SERVICE_ROLE_KEY="your_service_role_key" # ⚠️ NEVER expose to client
-    
-    # Contracts
-    NEXT_PUBLIC_BASE_SLICE_CONTRACT="0x..."
-    NEXT_PUBLIC_BASE_USDC_CONTRACT="0x..."
+NEXT_PUBLIC_APP_ENV="development" # or 'production'
+
+# Pinata / IPFS Config
+NEXT_PUBLIC_PINATA_JWT="your_pinata_jwt"
+NEXT_PUBLIC_PINATA_GATEWAY_URL="your_gateway_url"
+
+# Supabase Auth (For Passkeys & Email Auth) 🆕
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your_anon_key"
+
+# Stellar Network Configuration
+NEXT_PUBLIC_STELLAR_NETWORK="testnet" # or 'mainnet'
+NEXT_PUBLIC_STELLAR_RPC_URL="https://soroban-testnet.stellar.org"
+NEXT_PUBLIC_STELLAR_HORIZON_URL="https://horizon-testnet.stellar.org"
+
+# Stellar Contracts
+NEXT_PUBLIC_STELLAR_SLICE_CONTRACT="C..."
+NEXT_PUBLIC_STELLAR_USDC_CONTRACT="C..."
 ```
 
 ### 2. Install Dependencies
@@ -130,37 +127,17 @@ pnpm install
 pnpm run dev
 ```
 
-4. **Set up Supabase (for Passkey Auth):** 🆕
+### 4. Set up Supabase (for Passkey Auth) 🆕
 
 ```bash
-    # Apply database migration
-    # Option 1: Via Supabase Dashboard
-    # - Copy contents of supabase/migrations/001_create_user_passkeys.sql
-    # - Paste in SQL Editor and execute
-    
-    # Option 2: Via Supabase CLI
-    supabase db push
+# Apply database migration
+supabase db push
 ```
 
-* **PWA Mode:** Open `http://localhost:3000`
-* **Miniapp Mode:** Use the native testing environment given by the Miniapp SDK.
+**Access the application:**
 
----
-
-## 🔐 Authentication Methods
-
-This app supports multiple authentication methods:
-
-### Standard PWA
-- **Email/Password** - Traditional authentication
-- **Magic Link** - Passwordless email authentication
-- **Passkey** 🆕 - Biometric authentication (Touch ID, Face ID, Windows Hello)
-- **Social Login** - via Privy (Google, Twitter, etc.)
-
-### Documentation
-- 📄 **Passkey Implementation**: See `docs/PASSKEY_IMPLEMENTATION.md`
-- 📄 **Testing Guide**: See `docs/PASSKEY_TESTING.md`
-- 📄 **Known Issues**: See `docs/BUGS_AND_EDGE_CASES.md`
+- **PWA Mode:** Open `http://localhost:3000`
+- **Stellar Mode:** Use `http://stellar.localhost:3000` (requires host emulation)
 
 ---
 
@@ -172,35 +149,34 @@ The `src/config/` and `src/adapters/` directories manage the multi-environment l
 
 We abstract wallet interactions behind a common interface:
 
-* **`useWalletAdapter`** – Selects the active strategy based on environment.
-* **`WagmiAdapter`** – Wraps Wagmi hooks (Smart Wallets or EOA).
-* *(Planned)* **`LemonAdapter`** – Will wrap `@lemoncash/mini-app-sdk`.
+- **`useWalletAdapter`** – Selects the active strategy based on environment.
+- **`StellarAdapter`** – Wraps `@stellar/stellar-sdk` and Freighter (Soroban).
 
-### Chain Configuration (`src/config/chains.ts`)
+### Chain Configuration
 
-* Exports `SUPPORTED_CHAINS` mapping Wagmi `Chain` objects to contract addresses.
-* Defaults based on `NEXT_PUBLIC_APP_ENV`.
+- Exports `STELLAR_CONFIG` for Soroban RPCs and contract IDs.
+- Exports `STELLAR_NETWORKS` for testnet/mainnet switching.
 
 ---
 
 ## 🔧 Smart Contract Development
 
-The `contracts/` directory contains the Solidity smart contracts using **Hardhat** and **Viem**.
+- **Stellar:** `contracts/` (Soroban Rust SDK)
 
-### Commands
+Build and deploy Soroban contracts:
 
 ```bash
-pnpm hardhat compile
-pnpm hardhat test
-pnpm hardhat run scripts/deploy.ts --network baseSepolia
+cd contracts
+soroban contract build
+soroban contract deploy --network testnet
 ```
 
 ---
 
 ## 🗺️ Roadmap
 
-* [x] Phase 1 – Foundation (Core Protocol, Web UI)
-* [x] Phase 2 – Architecture Overhaul (Strategy Pattern, Multi-Tenant SDKs)
-* [ ] Phase 3 – MiniApp Expansion (Live integration with Lemon, Beexo)
-* [ ] Phase 4 – **Slice V1.2 High-Stakes Lottery** (Global Passive Staking)
-* [ ] Phase 5 – Specialized Courts & DAO Governance
+- [x] Phase 1 – Foundation (Core Protocol, Web UI)
+- [x] Phase 2 – Architecture Overhaul (Strategy Pattern, Multi-Tenant SDKs)
+- [x] Phase 3 – **Stellar Integration** (Soroban Contracts + Freighter Adapter)
+- [ ] Phase 4 – MiniApp Expansion (Lobstr, Additional Wallets)
+- [ ] Phase 5 – **Slice V1.2 High-Stakes Lottery** (Global Passive Staking)
