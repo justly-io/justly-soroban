@@ -2,8 +2,8 @@
 
 import React, { useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useGetDispute } from "@/hooks/disputes/useGetDispute";
-import { useExecuteRuling } from "@/hooks/actions/useExecuteRuling";
+import { useGetDispute } from "@/blockchain/hooks";
+import { useExecuteRuling } from "@/blockchain/hooks";
 import { SuccessAnimation } from "@/components/SuccessAnimation";
 import { usePageSwipe } from "@/hooks/ui/usePageSwipe";
 import { Loader2, Wallet, Trophy, Coins, Gavel } from "lucide-react";

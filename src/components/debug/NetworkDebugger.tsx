@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount } from "wagmi";
+import { useAccount } from "@/blockchain/hooks";
 import { defaultChain } from "@/config/chains";
 
 export const NetworkDebugger = () => {

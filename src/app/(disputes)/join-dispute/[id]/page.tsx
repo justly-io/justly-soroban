@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useGetDispute } from "@/hooks/disputes/useGetDispute";
+import { useGetDispute } from "@/blockchain/hooks";
 import {
   Loader2,
   ShieldCheck,

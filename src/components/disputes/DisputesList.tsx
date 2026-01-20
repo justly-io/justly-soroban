@@ -2,9 +2,9 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { DisputeListView } from "./DisputeListView";
-import { useAccount } from "wagmi";
+import { useAccount } from "@/blockchain/hooks";
 import ConnectButton from "../ConnectButton";
-import { useDisputeList } from "@/hooks/disputes/useDisputeList";
+import { useDisputeList } from "@/blockchain/hooks";
 
 export const DisputesList: React.FC = () => {
   const router = useRouter();

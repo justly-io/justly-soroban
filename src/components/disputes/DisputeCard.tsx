@@ -17,7 +17,7 @@ import {
   Lock,
   Archive,
 } from "lucide-react";
-import type { Dispute } from "@/hooks/disputes/useDisputeList";
+import type { Dispute } from "@/blockchain/hooks";
 import { cn } from "@/lib/utils";
 
 // Helper to get Lucide icon component based on category string

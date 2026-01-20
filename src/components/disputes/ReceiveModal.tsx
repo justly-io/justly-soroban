@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSliceAccount } from "@/hooks/core/useSliceAccount";
-import { DEFAULT_CHAIN } from "@/config/chains"; // Import settings to get the Chain ID
+import { useAccount } from "@/blockchain/hooks";
+import { DEFAULT_CHAIN } from "@evm/config/chains"; // Import settings to get the Chain ID
 import { toast } from "sonner";
 import { X, Copy, Check } from "lucide-react";
 
@@ -15,7 +15,7 @@ export const ReceiveModal: React.FC<ReceiveModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { address } = useSliceAccount();
+  const { address } = useAccount();
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !address) return null;

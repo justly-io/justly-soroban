@@ -16,7 +16,7 @@ import { PaginationDots } from "@/components/dispute-overview/PaginationDots";
 import { SuccessAnimation } from "@/components/SuccessAnimation";
 import { DisputeCandidateCard } from "@/components/disputes/DisputeCandidateCard";
 import { VsBadge } from "@/components/disputes/VsBadge";
-import { useReveal } from "@/hooks/voting/useReveal";
+import { useReveal } from "@/blockchain/hooks";
 import { usePageSwipe } from "@/hooks/ui/usePageSwipe";
 import { useDisputeParties } from "@/hooks/disputes/useDisputeParties";
 

@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount } from "@/blockchain/hooks";
 import { User, Coins } from "lucide-react";
 
 import { DisputeOverviewHeader } from "@/components/dispute-overview/DisputeOverviewHeader";
 import { SwipeButton } from "@/components/category-amount/SwipeButton";
-import { usePayDispute } from "@/hooks/actions/usePayDispute";
-import { useGetDispute } from "@/hooks/disputes/useGetDispute";
+import { usePayDispute } from "@/blockchain/hooks";
+import { useGetDispute } from "@/blockchain/hooks";
 
 export default function PayDisputePage() {
   const router = useRouter();

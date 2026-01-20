@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useCreateDispute } from "@/hooks/actions/useCreateDispute";
+import { useCreateDispute } from "@/blockchain/hooks";
 import { uploadFileToIPFS } from "@/util/ipfs";
 import type { CreateDisputeForm, FileState } from "@/components/create";
 

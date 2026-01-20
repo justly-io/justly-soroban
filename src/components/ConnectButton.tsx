@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { useSliceConnect } from "@/hooks/core/useSliceConnect";
-import { useAccount } from "wagmi";
+import { useSliceConnect } from "@/blockchain/hooks";
+import { useAccount } from "@/blockchain/hooks";
 import { useSupabase } from "@/components/providers/SupabaseProvider";
 import { toast } from "sonner";
 import { Loader2, Copy, Check, Wallet, LogOut, User } from "lucide-react";

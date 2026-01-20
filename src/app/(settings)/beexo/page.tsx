@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useConnect, useAccount, useBalance, useSendTransaction } from "wagmi";
+import { useConnect, useBalance, useSendTransaction } from "wagmi";
+import { useAccount } from "@/blockchain/hooks";
 import { parseEther, formatEther } from "viem";
 import { Wallet, Loader2, AlertTriangle, Terminal } from "lucide-react";
 import { toast } from "sonner";

@@ -2,8 +2,8 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
-import { useMyDisputes } from "@/hooks/disputes/useMyDisputes";
+import { useAccount } from "@/blockchain/hooks";
+import { useMyDisputes } from "@/blockchain/hooks";
 import { DisputeOverviewHeader } from "@/components/dispute-overview/DisputeOverviewHeader";
 import {
   Plus,

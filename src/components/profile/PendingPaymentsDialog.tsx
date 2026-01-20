@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount } from "@/blockchain/hooks";
 import { AlertCircle, ArrowRight, Coins } from "lucide-react";
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useMyDisputes } from "@/hooks/disputes/useMyDisputes";
+import { useMyDisputes } from "@/blockchain/hooks";
 import { Button } from "@/components/ui/button";
 
 export const PendingPaymentsDialog = () => {

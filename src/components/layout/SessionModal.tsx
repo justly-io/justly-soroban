@@ -1,7 +1,7 @@
 "use client";
 
 import { useSupabase } from "@/components/providers/SupabaseProvider";
-import { useAccount } from "wagmi";
+import { useAccount } from "@/blockchain/hooks";
 import { Copy, LogOut, X } from "lucide-react";
 import { toast } from "sonner";
 

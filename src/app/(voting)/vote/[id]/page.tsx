@@ -9,7 +9,7 @@ import { PaginationDots } from "@/components/dispute-overview/PaginationDots";
 import { SuccessAnimation } from "@/components/SuccessAnimation";
 import { DisputeCandidateCard } from "@/components/disputes/DisputeCandidateCard";
 import { VsBadge } from "@/components/disputes/VsBadge";
-import { useVote } from "@/hooks/voting/useVote";
+import { useVote } from "@/blockchain/hooks";
 import { usePageSwipe } from "@/hooks/ui/usePageSwipe";
 import { useDisputeParties } from "@/hooks/disputes/useDisputeParties";
 

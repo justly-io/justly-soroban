@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useAccount } from "wagmi";
+import { useAccount } from "@/blockchain/hooks";
 import { useRouter } from "next/navigation";
 import { RefreshCw, ArrowDownCircle, Send, QrCode } from "lucide-react";
-import { useTokenBalance } from "@/hooks/core/useTokenBalance";
+import { useTokenBalance } from "@/blockchain/hooks";
 import { SendModal } from "./SendModal";
 import { ReceiveModal } from "./ReceiveModal";
 import { FaucetButton } from "./FaucetButton";

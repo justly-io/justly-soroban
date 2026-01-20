@@ -1,7 +1,7 @@
 "use client";
 
 import { Droplets, Loader2 } from "lucide-react";
-import { useFaucet } from "@/hooks/actions/useFaucet";
+import { useFaucet } from "@/blockchain/hooks";
 
 export const FaucetButton = () => {
   const { mint, isPending, isReady } = useFaucet();
