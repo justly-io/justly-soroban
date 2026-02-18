@@ -85,10 +85,10 @@ Standardized tier profiles (protocol design):
 
 | Tier | Jurors | Stake per Juror | Stake per Party | Fixed Fee | Security Level |
 |------|--------|-----------------|-----------------|-----------|----------------|
-| Tier 1 | 3 | 1 USD | 4 USD | 3 USD | Low |
+| Tier 1 | 3 | 1 USD | 4 USD | 3 USD | Basic |
 | Tier 2 | 5 | 5 USD | 10 USD | 5 USD | Medium |
-| Tier 3 | 7 | 10 USD | 17 USD | 7 USD | High |
-| Tier 4 | 9 | 20 USD | 29 USD | 9 USD | Very High |
+| Tier 3 | 7 | 15 USD | 17 USD | 7 USD | High |
+| Tier 4 | 9 | 25 USD | 29 USD | 9 USD | Very High |
 
 Current implementation note: active deployments may use courts/categories and dispute parameters while preserving the same economic principles.
 
@@ -97,6 +97,8 @@ Current implementation note: active deployments may use courts/categories and di
 ## Architecture: Multi-Tenant + Strategy Pattern
 
 This application uses a strategy-based adapter layer for wallet and chain interactions. UI components remain wallet-agnostic and consume unified account/provider abstractions.
+
+At protocol level, integrators interact with the **Stellar contract interface**. That Stellar contract acts as a **proxy layer**: disputes are opened from Stellar, routed to Justly's arbitration layer on **Base**, and the resulting ruling is applied back to the originating flow.
 
 ### Connection Strategy
 
@@ -108,7 +110,7 @@ This application uses a strategy-based adapter layer for wallet and chain intera
 
 | Platform | Subdomain | Connection Strategy | Auth Type |
 |----------|-----------|---------------------|-----------|
-| Standard PWA | `app.` | Stellar SDK | Freighter / Lobstr / Passkey |
+| Standard PWA | `app.` | Stellar SDK | Freighter / Lobstr |
 | Stellar MiniApp | `stellar.` | Stellar SDK | Freighter / Lobstr |
 
 ---
@@ -143,7 +145,7 @@ NEXT_PUBLIC_APP_ENV="development" # or "production"
 NEXT_PUBLIC_PINATA_JWT="your_pinata_jwt"
 NEXT_PUBLIC_PINATA_GATEWAY_URL="your_gateway_url"
 
-# Supabase Auth (passkeys + email)
+# Supabase Auth
 NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="your_anon_key"
 
@@ -187,26 +189,26 @@ Access locally:
 The multi-environment logic is centered in `src/config/` and `src/adapters/`.
 
 - `useWalletAdapter`: selects the active strategy by runtime context.
-- `StellarAdapter`: wraps `@stellar/stellar-sdk` and Soroban-specific flows.
+- `StellarAdapter`: wraps `@stellar/stellar-sdk` and Stellar-specific flows.
 - `STELLAR_CONFIG` / `STELLAR_NETWORKS`: network and contract configuration.
 
 ---
 
 ## Smart Contract Development
 
-Stellar contracts are in `contracts/` (Soroban Rust SDK).
+Stellar contracts are in `contracts/`.
 
 ```bash
 cd contracts/justly
-soroban contract build
-soroban contract deploy --network testnet
+stellar contract build
+stellar contract deploy --network testnet
 ```
 
 Run tests and optimize:
 
 ```bash
 cargo test
-soroban contract optimize --wasm target/wasm32-unknown-unknown/release/justly.wasm
+stellar contract optimize --wasm target/wasm32-unknown-unknown/release/justly.wasm
 ```
 
 ---
