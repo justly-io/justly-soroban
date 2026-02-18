@@ -93,7 +93,7 @@ pnpm dev
 **Soroban (Stellar)**
 
 ```bash
-cd contracts
+cd contracts/justly
 soroban contract build
 soroban contract deploy --network testnet
 soroban contract invoke --id C... --fn get_dispute -- --dispute_id 1
@@ -103,7 +103,7 @@ soroban contract invoke --id C... --fn get_dispute -- --dispute_id 1
 
 ```bash
 cargo test
-soroban contract optimize --wasm target/wasm32-unknown-unknown/release/slice.wasm
+soroban contract optimize --wasm target/wasm32-unknown-unknown/release/justly.wasm
 ```
 
 ---

@@ -1,6 +1,6 @@
 [package]
-name = "slice"
-description = "Slice - Sistema de resolución de disputas Kleros-like con voto privado ZK"
+name = "justly"
+description = "Justly - Decentralized dispute resolution protocol with commit-reveal voting"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
@@ -22,4 +22,3 @@ sha2 = { version = "0.10", default-features = false }
 [dev-dependencies]
 stellar-xdr = { version = "24.0.0", features = ["curr", "serde"] }
 soroban-sdk = { version = "23.1.0", features = ["testutils"] }
-

@@ -14,10 +14,10 @@ mod ultrahonk_contract {
 }
 
 #[contract]
-pub struct Slice;
+pub struct Justly;
 
 #[contractimpl]
-impl Slice {
+impl Justly {
     pub fn __constructor(
         env: Env,
         admin: Address,

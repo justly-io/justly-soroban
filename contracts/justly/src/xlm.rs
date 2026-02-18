@@ -49,11 +49,12 @@ mod register {
     pub fn register(env: &soroban_sdk::Env, admin: &soroban_sdk::Address) {
         let balance = super::token_client(env).try_balance(&env.current_contract_address());
         if balance.is_err() {
-            env.deployer().with_stellar_asset(super::SERIALIZED_ASSET).deploy();
+            env.deployer()
+                .with_stellar_asset(super::SERIALIZED_ASSET)
+                .deploy();
         }
     }
 }
 
 #[allow(unused_imports)]
 pub use register::*;
-
